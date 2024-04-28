@@ -1,7 +1,9 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
-const { saveUser, getAllUser } = require('../../services/user.service');
-const { AdminCommander } = require("./admin");
+const { save } = require('../../services/user.service');
 const { UserCommander } = require("./user");
+const { AdminCommander } = require("./admin")
+const logger = require('../logger');
+
 
 const initializeWhatsAppClient = (io) => {
   const client = new Client({
@@ -9,9 +11,14 @@ const initializeWhatsAppClient = (io) => {
       args: ['--no-sandbox'],
       // executablePath: '/usr/bin/google-chrome-stable',
     },
+    webVersionCache: {
+      type: "remote",
+      remotePath:
+        "https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html",
+    },
     authStrategy: new LocalAuth(
       {
-        dataPath: '../sessions'
+        dataPath: '../sessions/makeda'
       }
     ),
   });
@@ -43,24 +50,24 @@ const initializeWhatsAppClient = (io) => {
 };
 
 const handleIncomingMessages = (client) => {
-  const transactionSteps = {};
-
   client.on('message', async (msg) => {
     const contact = await msg.getContact();
-    const contactName = contact.pushname;
-    if(msg.from.replace(/@c\.us$/, "") !== 'status@broadcast'){
-      await saveUser(msg.from, contactName);
+    const response = await save(contact.number, contact.pushname);
+    try {
+      if (response?.data?.role == "user") {
+        await UserCommander(response, msg, client);
+      }
+      else if (response?.data?.role == "admin") {
+        await AdminCommander(response, msg, client)
+      }
+      else {
+        logger(client).error('Erreur rencontrée handleIncomingMessages', response.error);
+        msg.reply(response.message)
+      }
     }
-
-    let response = await getAllUser(msg.from.replace(/@c\.us$/, ""));
-    let user = response?.users[0];
-    transactionSteps.userType = user?.role || 'user';
-
-    if (transactionSteps.userType === 'admin' && !msg.isGroupMsg) {
-      await AdminCommander(client, msg, transactionSteps);
-    }
-    else {
-      await UserCommander(client, msg, transactionSteps);
+    catch (err) {
+      logger(client).error('Erreur rencontrée handleIncomingMessages', err);
+      msg.reply("We're sorry, but an internal server error has occurred. Our team has been alerted and is working to resolve the issue. Please try again later.")
     }
   });
 };

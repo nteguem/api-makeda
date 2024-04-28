@@ -1,27 +1,17 @@
-const { welcomeData, menuData } = require("../../data");
+const { menuData } = require("../../data");
+const logger = require('../logger');
 
 
-const welcomeStatusUser = {};
-
-
-const UserCommander = async (client, msg) => {
-  const contact = await msg.getContact();
-  const welcomeMessage = welcomeData(contact.pushname);
-
-  const MenuPrincipal = menuData();
-
-  if (!welcomeStatusUser[msg.from]) {
-    // Envoyer le message de bienvenue la première fois
-    msg.reply(welcomeMessage);
-
-    // Enregistrer l'état de bienvenue pour cet utilisateur
-    welcomeStatusUser[msg.from] = true;
-  } else if (!msg.isGroupMsg) {
-    const userResponse = msg.body.trim();
-
-        msg.reply(userResponse);
-      
+const UserCommander = async (user, msg,client) => {
+  try {
+    const Menu = menuData(user.data.pseudo, user.exist);
+    if (!('participant' in msg.id)) {
+      msg.reply(Menu);
     }
+  } catch (error) {
+    logger(client).error('Erreur rencontrée User', error);
+    msg.reply(`An internal server error occurred due to an action by user : ${user.data.pseudo}. Our team is working on it. \n\n Please type # to return to the main menu.`)
+  }
 };
 
 module.exports = {
