@@ -1,16 +1,13 @@
 const userService = require('../services/user.service');
+const ResponseService = require('../services/response.service');
 
 
 const getAllUser = async (req, res) => {
-  let { phoneNumber } = req.body;
-  const page = req.query.page;
-  const limit = req.query.limit;
-  const response = await userService.getAllUserPagination(phoneNumber || null, page, limit);
-
+  const response = await userService.list()
   if (response.success) {
-    res.json({users: response.users, totalCount: response.totalUsers, success: true });
+    return ResponseService.success(res, { users: response.users });
   } else {
-    res.status(500).json({ message: 'Erreur lors de la récupération des users', error: response.error });
+    return ResponseService.internalServerError(res, { error: response.error });
   }
 };
 

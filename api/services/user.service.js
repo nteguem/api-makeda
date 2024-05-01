@@ -55,7 +55,7 @@ async function list(data={}) {
       query = { type };
     }
     const users = await User.find(query)
-    return { success: true, users: users };
+    return { success: true,users };
   } catch (error) {
     return { success: false, error: error.message };
   }

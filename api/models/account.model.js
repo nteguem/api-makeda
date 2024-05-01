@@ -1,0 +1,153 @@
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+
+const accountSchema = new Schema({
+        //same fields
+  user: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+    unique: true
+  },
+  accountType: {
+    type: String,
+    enum: ['personne_morale', 'personne_physique'],
+    required: true
+  },
+  fullName: {
+    type: String,
+    required: true
+  },
+  address: {
+    type: String,
+  }, 
+  phoneNumber: {
+    type: String,
+    required: true
+  },
+  email: {
+    type: String,
+    required: true
+  },
+  niu:{
+    type:String,
+    required:true
+  },
+  investmentObjective: {
+    type: String,
+    enum: ['Diversification du patrimoine', 'Revenus complementaires', 'Transmission du patrimoine', 'Rendement', 'Autres'],
+    required: true
+  },
+  financialMarketExperience: {
+    type: String,
+    enum: ['oui', 'non'],
+    required: true
+  },
+  investmentHorizon: {
+    type: String,
+    enum: ['Court-terme', 'Moyen-terme', 'Long-terme'],
+    required: true
+  },
+  riskLevel: {
+    type: String,
+    enum: ['Faible', 'Moyen', 'Élevé'],
+    required: true
+  },
+  financialSituationLastThreeYears: {
+    type: String,
+    required: true
+  },
+  bankDomiciliation: {
+    type: String,
+    required: true
+  },
+  ribFile: {
+    type: String,
+    required: true
+  },
+
+
+    //specific fields  accountType = personne physique
+  dateOfBirth: {
+    type: Date,
+  },
+  placeOfBirth: {
+    type: String,
+  },
+  nationality: {
+    type: String,
+  },
+  profession: {
+    type: String,
+  },
+  employerName: {
+    type: String,
+  },
+
+  identityDocument: {
+    type: String,
+  },
+  maritalStatus: {
+    type: String,
+    enum: ['Célibataire', 'Marié(e)', 'Divorcé(e)', 'Veuf(ve)'],
+  },
+  emergencyContacts:{
+    type: String,
+  },
+  capitalOrigin: {
+    type: String,
+    enum: ['épargne', 'crédit', 'cession d\'actifs', 'fonds propres', 'héritage familiale', 'autres'],
+  },
+
+  taxNumberCertificateFile: {
+    type: String,
+  },
+  incomeProof: {
+    type: String,
+  },
+  //specific fields  accountType = personne morale
+  socialName: {
+    type: String,
+  },
+  statutesCopyFile: {
+    type: String,
+  },
+  countryOfIncorporationOrResidence: {
+    type: String,
+  },
+  commerceRegistryNumber: {
+    type: String,
+  },
+  RCCMFile: {
+    type: String,
+  },
+  incorporationDate: {
+    type: Date,
+  },
+  legalRepresentative: {
+    type: String,
+    enum: ['Monsieur', 'Madame', 'Autres'],
+    required: true
+  },
+  actingAs: {
+    type: String,
+    required: true
+  },
+  investigationHistory: {
+    type: String,
+    enum: ['oui', 'non'],
+  },
+  primaryActivity: {
+    type: String,
+  },
+  secondaryActivity: {
+    type: String,
+  },
+  receivesSubsidies: {
+    type: String,
+  },
+}, { timestamps: true });
+
+const Account = mongoose.model('Account', accountSchema);
+
+module.exports = Account;
