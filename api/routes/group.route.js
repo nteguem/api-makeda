@@ -11,6 +11,7 @@ const setupGroup = (app) => {
     app.use("/group", router);
     router.get('/list', groupHandler.listGroups);
     router.post('/add', groupHandler.createGroup);
+    router.get('/download', groupHandler.generateAndDownloadCSV);
     router.put('/update', groupHandler.updateGroup);
     router.delete('/delete', groupHandler.deleteGroup);    
   };
