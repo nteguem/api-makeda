@@ -4,7 +4,7 @@ const { MessageMedia } = require('whatsapp-web.js');
 // Fonction pour envoyer un message à un numéro spécifique
 const sendMessageToNumber = async (client, phoneNumber, message) => {
     try {
-      await client.sendMessage(phoneNumber, message);
+      await client.sendMessage(`${phoneNumber}@c.us`, message);
     } catch (error) {
       console.log('Error sending message:', error);
     }
