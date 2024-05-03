@@ -37,7 +37,7 @@ async function deleteGroup(groupId) {
 
 async function listGroups() {
     try {
-        const groups = await Group.find({}, { members: 0,__v:0 });
+        const groups = await Group.find({}, { __v:0 });
         return { success: true, groups };
     } catch (error) {
         return { success: false, error: error.message };
