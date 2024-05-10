@@ -119,13 +119,13 @@ async function scheduleCampaignTasks(launch,client) {
 
         switch (campaign.periodicity.toLowerCase()) {
             case "daily":
-                cronExpression = '04 16 * * *';
+                cronExpression = '0 10 * * *';
                 break;
             case "weekly":
-                cronExpression = '05 16 * * *';
+                cronExpression = '0 10 * * 1';
                 break;
             case "monthly":
-                cronExpression = '06 16 * * *';
+                cronExpression = '0 10 1 * *';
                 break;
             default:
                 console.error(`Périodicité non prise en charge pour la campagne "${campaign.name}"`);
