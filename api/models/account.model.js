@@ -2,12 +2,16 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const accountSchema = new Schema({
-        //same fields
+  //same fields
   user: {
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: true,
     unique: true
+  },
+  service: {
+    type: String,
+    required: true
   },
   accountType: {
     type: String,
@@ -20,7 +24,7 @@ const accountSchema = new Schema({
   },
   address: {
     type: String,
-  }, 
+  },
   phoneNumber: {
     type: String,
     required: true
@@ -29,9 +33,9 @@ const accountSchema = new Schema({
     type: String,
     required: true
   },
-  niu:{
-    type:String,
-    required:true
+  niu: {
+    type: String,
+    required: true
   },
   investmentObjective: {
     type: String,
@@ -40,7 +44,7 @@ const accountSchema = new Schema({
   },
   financialMarketExperience: {
     type: String,
-    enum: ['oui', 'non'],
+    // enum: ['oui', 'non'],
     required: true
   },
   investmentHorizon: {
@@ -65,9 +69,11 @@ const accountSchema = new Schema({
     type: String,
     required: true
   },
+  taxNumberCertificateFile: {
+    type: String,
+  },
 
-
-    //specific fields  accountType = personne physique
+  //specific fields  accountType = personne physique
   dateOfBirth: {
     type: Date,
   },
@@ -89,9 +95,9 @@ const accountSchema = new Schema({
   },
   maritalStatus: {
     type: String,
-    enum: ['Célibataire', 'Marié(e)', 'Divorcé(e)', 'Veuf(ve)'],
+    // enum: ['Célibataire', 'Marié(e)', 'Divorcé(e)', 'Veuf(ve)'],
   },
-  emergencyContacts:{
+  emergencyContacts: {
     type: String,
   },
   capitalOrigin: {
@@ -99,9 +105,6 @@ const accountSchema = new Schema({
     enum: ['épargne', 'crédit', 'cession d\'actifs', 'fonds propres', 'héritage familiale', 'autres'],
   },
 
-  taxNumberCertificateFile: {
-    type: String,
-  },
   incomeProof: {
     type: String,
   },
@@ -112,7 +115,7 @@ const accountSchema = new Schema({
   statutesCopyFile: {
     type: String,
   },
-  countryOfIncorporationOrResidence: {
+  incorporationCountry: {
     type: String,
   },
   commerceRegistryNumber: {
@@ -126,7 +129,7 @@ const accountSchema = new Schema({
   },
   legalRepresentative: {
     type: String,
-    enum: ['Monsieur', 'Madame', 'Autres'],
+    enum: ['Monsieur', 'Madame', 'Autre'],
     required: true
   },
   actingAs: {
@@ -137,7 +140,7 @@ const accountSchema = new Schema({
     type: String,
     enum: ['oui', 'non'],
   },
-  primaryActivity: {
+  mainActivity: {
     type: String,
   },
   secondaryActivity: {
