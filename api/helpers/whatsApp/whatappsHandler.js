@@ -3,8 +3,6 @@ const { save } = require('../../services/user.service');
 const { UserCommander } = require("./user");
 const { AdminCommander } = require("./admin")
 const logger = require('../logger');
-
-
 const initializeWhatsAppClient = (io) => {
   const client = new Client({
     puppeteer: {

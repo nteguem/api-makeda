@@ -7,7 +7,6 @@ const accountSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: true,
-    unique: true
   },
   service: {
     type: String,
@@ -18,7 +17,11 @@ const accountSchema = new Schema({
     enum: ['personne_morale', 'personne_physique'],
     required: true
   },
-  fullName: {
+  name: {
+    type: String,
+    required: true
+  },
+  firstName: {
     type: String,
     required: true
   },
@@ -35,11 +38,11 @@ const accountSchema = new Schema({
   },
   niu: {
     type: String,
-    required: true
+    // required: true
   },
   investmentObjective: {
     type: String,
-    enum: ['Diversification du patrimoine', 'Revenus complementaires', 'Transmission du patrimoine', 'Rendement', 'Autres'],
+    // enum: ['Diversification du patrimoine', 'Revenus complémentaires', 'Transmission du patrimoine', 'Rendement', 'Autres'],
     required: true
   },
   financialMarketExperience: {
@@ -47,9 +50,13 @@ const accountSchema = new Schema({
     // enum: ['oui', 'non'],
     required: true
   },
+  financialMarketExperienceNumber:
+  {
+    type: String,
+  },
   investmentHorizon: {
     type: String,
-    enum: ['Court-terme', 'Moyen-terme', 'Long-terme'],
+    // enum: ['Court-terme', 'Moyen-terme', 'Long-terme'],
     required: true
   },
   riskLevel: {
@@ -71,6 +78,11 @@ const accountSchema = new Schema({
   },
   taxNumberCertificateFile: {
     type: String,
+  },
+  civility: {
+    type: String,
+    enum: ['Monsieur', 'Madame', 'Autre'],
+    // required: true
   },
 
   //specific fields  accountType = personne physique
@@ -96,6 +108,9 @@ const accountSchema = new Schema({
   maritalStatus: {
     type: String,
     // enum: ['Célibataire', 'Marié(e)', 'Divorcé(e)', 'Veuf(ve)'],
+  },
+  conjoint: {
+    type: String,
   },
   emergencyContacts: {
     type: String,
@@ -127,23 +142,21 @@ const accountSchema = new Schema({
   incorporationDate: {
     type: Date,
   },
-  legalRepresentative: {
-    type: String,
-    enum: ['Monsieur', 'Madame', 'Autre'],
-    required: true
-  },
   actingAs: {
     type: String,
-    required: true
+    // required: true
   },
   investigationHistory: {
     type: String,
-    enum: ['oui', 'non'],
+    // enum: ['oui', 'non'],
   },
   mainActivity: {
     type: String,
   },
   secondaryActivity: {
+    type: String,
+  },
+  natureActivity: {
     type: String,
   },
   receivesSubsidies: {

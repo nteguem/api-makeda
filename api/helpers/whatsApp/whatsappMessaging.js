@@ -14,7 +14,7 @@ const sendMessageToNumber = async (client, phoneNumber, message) => {
   const sendMediaToNumber = async (client, phoneNumber, mediaType, mediaBase64, filename) => {
     try {
       const media = new MessageMedia(mediaType, mediaBase64, filename);
-      await client.sendMessage(phoneNumber, media);
+      await client.sendMessage(`${phoneNumber}@c.us`, media);
     } catch (error) {
       console.error('Error sending media:', error);
     }
