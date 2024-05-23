@@ -21,6 +21,10 @@ const accountSchema = new Schema({
     type: String,
     required: true
   },
+  fiche: {
+    type: String,
+    required: true
+  },
   firstName: {
     type: String,
     required: true

@@ -1,7 +1,7 @@
 require("dotenv").config();
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const User = require("../models/user.model");
-
-
 
 async function save(phoneNumber, contactName) {
   try {
@@ -38,14 +38,25 @@ async function save(phoneNumber, contactName) {
   }
 }
 
-async function listAdmin() {
-  const users = await User.find({ role: 'admin' });
-  if (users) {
-    return { success: true, users: users };
-  } else {
-    return { success: false, error: 'Error getting admin users' };
+async function login(phoneNumber, password) {
+  try {
+    const user = await User.findOne({ phoneNumber });
+    if (!user) {
+      return { success: false, error: 'User not found' };
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return { success: false, error: 'Invalid credentials' };
+    }
+
+    const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '24h' });
+    return { success: true, token };
+  } catch (error) {
+    return { success: false, error: error.message };
   }
 }
+
 
 async function list(data={}) {
   try {
@@ -55,16 +66,14 @@ async function list(data={}) {
       query = { type };
     }
     const users = await User.find(query)
-    return { success: true,users };
+    return { success: true, users };
   } catch (error) {
     return { success: false, error: error.message };
   }
 }
 
-
-
 module.exports = {
   save,
-  listAdmin,
+  login,
   list,
 };

@@ -236,12 +236,15 @@ const kycEnterpriseCommander = async (user, msg, client, service) => {
           break;
           case 27:
             if (userInput == "Valider") {
+              const pdfBuffer = await fillPdfFields(pathTemplateKyc, userData[phoneNumber].answers)
+              const responseClodinary = await uploadToCloudinary(`${userData[phoneNumber].answers["socialName"]}_fiche`, pdfBuffer)
+              userData[phoneNumber].answers["fiche"] = (responseClodinary);
               const response = await AccountService.createAccount(userData[phoneNumber].answers);
               if (response.success) {
                 userData[phoneNumber].step++;
                 const pdfBuffer = await fillPdfFields(pathTemplateKyc, userData[phoneNumber].answers)
                 const pdfBase64 = pdfBuffer.toString("base64");
-                const pdfName = `${userData[phoneNumber].answers["name"]}_kyc`;
+                const pdfName = `${userData[phoneNumber].answers["name"]}_kyb`;
                 const documentType = "application/pdf";
                 await sendMediaToNumber(client,phoneNumber, documentType, pdfBase64, pdfName)
               } else {

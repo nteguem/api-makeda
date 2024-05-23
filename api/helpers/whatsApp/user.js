@@ -30,17 +30,17 @@ const UserCommander = async (user, msg, client) => {
               Steps[msg.from]["isSubMenu"] = false;
               break;
             case "3":
-              msg.reply(`⚠  _La réglementation fait obligation aux intermédiaires financiers de collecter des informations sur la situation patrimoniale et financière de l’investisseur et sa connaissance en matière de produits financiers conformément aux règlement N°01/CEMAC/UMAC/CM du 11 avril 2016_\n*Choisir le service pour lequel vous voulez ouvrir un compte* :\n\n1. Gestion sous Mandat, tapez 1.\n2. Gestion Collective, tapez 2.\n3. Conseil Financier, tapez 3.\n\n_Tapez # pour revenir au menu principal_`);
+              msg.reply(`⚠  _La réglementation fait obligation aux intermédiaires financiers de collecter des informations sur la situation patrimoniale et financière de l’investisseur et sa connaissance en matière de produits financiers conformément aux règlement N°01/CEMAC/UMAC/CM du 11 avril 2016_\n\n *Veuillez noter que la création du compte peut prendre jusqu'à 7 minutes.* \n\n📋 Choisir le service pour lequel vous voulez ouvrir un compte :\n\n1. Gestion sous Mandat, tapez 1.\n2. Gestion Collective, tapez 2.\n3. Conseil Financier, tapez 3.\n\n_Tapez # pour revenir au menu principal_`);
               Steps[msg.from]["isSubMenu"] = true;
               Steps[msg.from]["currentMenu"] = "accountMenu";
               break;
             case "4":
-              msg.reply(`Parrainage :\nPartagez votre code de parrainage unique pour permettre à d'autres de créer un compte sous votre parrainage chez MAKEDA Asset Management.\nEn tant que parrain, vous bénéficiez également d'avantages.\n\nVotre code de parrainage : 14GNR\n\n_Tapez # pour revenir au menu principal_`);
+              msg.reply(`Parrainage :\nPartagez votre code de parrainage unique pour permettre à d'autres de créer un compte sous votre parrainage chez MAKEDA Asset Management.\nEn tant que parrain, vous bénéficiez également d'avantages.\n\nVotre code de parrainage : ${user.data.referralCode}\n\n_Tapez # pour revenir au menu principal_`);
               Steps[msg.from]["isSubMenu"] = false;
               Steps[msg.from]["currentMenu"] = "referralMenu";
               break;
             case "5":
-              msg.reply("Simulation des gains");
+              msg.reply("*Simulateur de Gains pour MAKEDA Asset Management* \n\n Découvrez le potentiel de vos investissements avec le Makeda Investment Simulator. Cet outil interactif vous permet de simuler divers scénarios de placement et d'évaluer les gains possibles. Basé sur des données fiables, il est conçu pour vous aider à visualiser et planifier vos objectifs financiers de manière efficace et simple.\n\n Accédez au simulateur ici : \nhttps://public.tableau.com/app/profile/warot.bertrand/viz/shared/RDSYBH8K8");
               Steps[msg.from]["isSubMenu"] = true;
               Steps[msg.from]["currentMenu"] = "simulateGainMenu";
               break;

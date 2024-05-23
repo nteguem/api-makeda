@@ -41,7 +41,8 @@ async function deleteAccount(req, res) {
 }
 
 async function listAccounts(req, res) {
-    const response = await AccountService.listAccounts();
+    const service = req.query.service;
+    const response = await AccountService.listAccounts(service);
     if (response.success) {
         return ResponseService.success(res, { accounts: response.accounts });
     } else {

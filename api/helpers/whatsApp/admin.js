@@ -1,9 +1,9 @@
-const { menuData } = require("../../data");
+const { adminMenuData } = require("../../data");
 const logger = require('../logger');
 
 const AdminCommander = async (user, msg,client) => {
   try {
-    const Menu = menuData(user.data.pseudo, user.exist);
+    const Menu = adminMenuData(user.data.pseudo, user.exist);
     if (!('participant' in msg.id)) {
       msg.reply(Menu);
     }

@@ -34,9 +34,10 @@ async function deleteAccount(accountId) {
     }
 }
 
-async function listAccounts() {
+async function listAccounts(service) {
     try {
-        const accounts = await Account.find();
+        const query = service ? { service } : {};
+        const accounts = await Account.find(query);
         return { success: true, accounts };
     } catch (error) {
         return { success: false, error: error.message };

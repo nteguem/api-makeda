@@ -229,6 +229,9 @@ const kycPersonCommander = async (user, msg, client, service) => {
           break;
         case 26:
           if (userInput == "Valider") {
+            const pdfBuffer = await fillPdfFields(pathTemplateKyc, userData[phoneNumber].answers)
+            const responseClodinary = await uploadToCloudinary(`${userData[phoneNumber].answers["name"]}_fiche`, pdfBuffer)
+            userData[phoneNumber].answers["fiche"] = (responseClodinary);
             const response = await AccountService.createAccount(userData[phoneNumber].answers);
             if (response.success) {
               userData[phoneNumber].step++;

@@ -10,6 +10,7 @@ const setupUserRoutes = (app) => {
     // Mount the 'router' to handle routes with the base path '/user'.
     app.use("/user", router);
     router.get('/list', userHandler.getAllUser);
+    router.post('/login', userHandler.login);
   };
   
   module.exports = { setupUserRoutes };

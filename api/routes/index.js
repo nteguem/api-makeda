@@ -7,6 +7,7 @@ const {setupOffer} = require('./offer.route');
 const {setupProduct} = require('./product.route');
 const {setupCampaign} = require('./campaign.route');
 const {setupGroup} = require('./group.route')
+const {setupAccount} = require('./account.route')
 /* GET home page. */
 // Define a route for the home page ('/') that renders the 'index' template with the title 'Bibemella'.
 router.get('/', function(req, res, next) {
@@ -25,6 +26,7 @@ const setupAppRoutes = (client) => {
   setupProduct(app);
   setupCampaign(app,client);
   setupGroup(app);
+  setupAccount(app);
   return app;
 }
 
