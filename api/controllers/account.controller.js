@@ -41,15 +41,14 @@ async function deleteAccount(req, res) {
 }
 
 async function listAccounts(req, res) {
-    const service = req.query.service;
-    const response = await AccountService.listAccounts(service);
+    const { service, phoneNumber } = req.query;
+    const response = await AccountService.listAccounts(service, phoneNumber);
     if (response.success) {
         return ResponseService.success(res, { accounts: response.accounts });
     } else {
         return ResponseService.internalServerError(res, { error: response.error });
     }
 }
-
 module.exports = {
     createAccount,
     updateAccount,

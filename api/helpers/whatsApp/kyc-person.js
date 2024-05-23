@@ -3,10 +3,11 @@ const AccountService = require('../../services/account.service');
 const { uploadToCloudinary } = require("../../services/uploadFile.service");
 const { sendMediaToNumber } = require("./whatsappMessaging");
 const { fillPdfFields } = require("../../services/fillFormPdf.service");
+const {list} = require("../../services/user.service")
+const { getRandomDelay } = require("../../helpers/utils")
 
 // Objet pour stocker l'étape actuelle et les réponses de l'utilisateur
 let userData ={};
-
 let countCase = 0;
 const pathTemplateKyc = "../../kyc-template/KYC Personne Physique.pdf"
 
@@ -14,6 +15,7 @@ const pathTemplateKyc = "../../kyc-template/KYC Personne Physique.pdf"
 const kycPersonCommander = async (user, msg, client, service) => {
   try {
     const phoneNumber = user.data.phoneNumber;
+    const listAdmin = await list("admin");
     if (!userData[phoneNumber]) {
       userData[phoneNumber] = {
         step: 1,
@@ -235,14 +237,23 @@ const kycPersonCommander = async (user, msg, client, service) => {
             const response = await AccountService.createAccount(userData[phoneNumber].answers);
             if (response.success) {
               userData[phoneNumber].step++;
-              const pdfBuffer = await fillPdfFields(pathTemplateKyc, userData[phoneNumber].answers)
               const pdfBase64 = pdfBuffer.toString("base64");
               const pdfName = `${userData[phoneNumber].answers["name"]}_kyc`;
               const documentType = "application/pdf";
               await sendMediaToNumber(client, phoneNumber, documentType, pdfBase64, pdfName)
+              for (const admin of listAdmin.users) {
+                try {
+                    const content = `Nouveau compte crée pour le service : ${service} ,${userData[phoneNumber].answers["accountType"]} : ${userData[phoneNumber].answers["name"]} \n\n consultez la fiche ci-joint.`;
+                    await sendMessageToNumber(client,admin.phoneNumber, content);
+                    await sendMediaToNumber(client, admin.phoneNumber, documentType, pdfBase64, pdfName)
+                    const delay = getRandomDelay(5000, 15000);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                } catch (error) {
+                    console.log(`Erreur lors de l'envoi ${admin.phoneNumber}`, error);
+                }
+            }
             } else {
-              console.log("response",response)
-              msg.reply("echec creation du compte!")
+              msg.reply(`echec creation du compte! : *${response}*`)
             }
           }
           else {
@@ -287,7 +298,7 @@ const getCurrentStepMessage = (step) => {
     case 2:
       return "Veuillez saisir le prénom  de la personne en charge de l'investissement.";
     case 3:
-      return "*Titre de civilité* : \n A-Monsieur ,\n B-Madame ,\n C-Autres ,\n"
+      return "📋 *Titre de civilité* : \n A-Monsieur ,\n B-Madame ,\n C-Autres ,\n"
     case 4:
       return "Veuillez saisir la date de naissance (eg:_12/12/1990_).";
     case 5:
@@ -309,21 +320,21 @@ const getCurrentStepMessage = (step) => {
     case 13:
       return "Veuillez joindre le document d'identité (_Passeport, Carte d'identité, Carte de Séjour_). \n\n NB: _joindre une image ou un document pdf_";
     case 14:
-      return `*Veuillez saisir l'état Civil* : \n A-Célibataire ,\n B-Marié.e ,\n C-Divorcé.e ,\n D-Veuf.ve \n *NB* : Si vous êtes marié.e, veuillez fournir le nom et le numéro de téléphone de votre conjoint(e) dans le format suivant : B- [Nom(s) du conjoint(e)] - [Numéro de téléphone du conjoint(e)] (eg:_B-Ateba matin-697436273_)`;
+      return `📋 *Veuillez saisir l'état Civil* : \n A-Célibataire ,\n B-Marié.e ,\n C-Divorcé.e ,\n D-Veuf.ve \n *NB* : Si vous êtes marié.e, veuillez fournir le nom et le numéro de téléphone de votre conjoint(e) dans le format suivant : B- [Nom(s) du conjoint(e)] - [Numéro de téléphone du conjoint(e)] (eg:_B-Ateba matin-697436273_)`;
     case 15:
       return "Veuillez saisir Nom(s) et Numéro de deux personnes à contacter en cas de besoin.";
     case 16:
-      return "*quel objectif répond le placement envisagé ?* : \n A-Diversification du patrimoine ,\n B-Revenus complémentaires ,\n C-Transmission du patrimoine ,\n D-Rendement ,\n E-Autres";
+      return "📋 *quel objectif répond le placement envisagé ?* : \n A-Diversification du patrimoine ,\n B-Revenus complémentaires ,\n C-Transmission du patrimoine ,\n D-Rendement ,\n E-Autres";
     case 17:
-      return "*Avez-vous une expérience professionnelle vous permettant d’acquérir une bonne connaissance des marchés financiers ?* :\n A-Oui,\n B-Non \n *NB*: si Oui veuillez fournir le nombre d'année d'expérience sur ce format [nombre d'année] (eg:10)";
+      return "📋 *Avez-vous une expérience professionnelle vous permettant d’acquérir une bonne connaissance des marchés financiers ?* :\n A-Oui,\n B-Non \n *NB*: si Oui veuillez fournir le nombre d'année d'expérience sur ce format [nombre d'année] (eg:10)";
     case 18:
-      return "*Horizon de placement* : \n A-Court-terme (moins de 2 ans),\n B-Moyen-terme (2-5 ans),\n C-Long-terme (Plus de 5 ans).";
+      return "📋 *Horizon de placement* : \n A-Court-terme (moins de 2 ans),\n B-Moyen-terme (2-5 ans),\n C-Long-terme (Plus de 5 ans).";
     case 19:
-      return "*Quel est votre niveau de risque* : \n A-Faible ,\n B-Moyenne ,\n C-Élevée.";
+      return "📋 *Quel est votre niveau de risque* : \n A-Faible ,\n B-Moyenne ,\n C-Élevée.";
     case 20:
       return "Décrivez en une phrase votre situation financière durant les trois (03) dernières années.";
     case 21:
-      return "*Nature et origine des capitaux investis* :\n A-Epargne ,\n B-Credit ,\n C-Cession d'actifs ,\n D-Fonds propres,\n E-Héritage Familiale,\n F-Autres";
+      return "📋 *Nature et origine des capitaux investis* :\n A-Epargne ,\n B-Credit ,\n C-Cession d'actifs ,\n D-Fonds propres,\n E-Héritage Familiale,\n F-Autres";
     case 22:
       return "Veuillez saisir le nom de votre banque et domiciliation.";
     case 23:

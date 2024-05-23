@@ -1,4 +1,5 @@
 const Account = require('../models/account.model');
+const User = require('../models/user.model');
 
 async function createAccount(accountData) {
     try {
@@ -34,10 +35,23 @@ async function deleteAccount(accountId) {
     }
 }
 
-async function listAccounts(service) {
+async function listAccounts(service, phoneNumber) {
     try {
-        const query = service ? { service } : {};
-        const accounts = await Account.find(query);
+        let query = {};
+        if (service) {
+            query.service = service;
+        }
+        
+        if (phoneNumber) {
+            const user = await User.findOne({ phoneNumber });
+            if (user) {
+                query.user = user._id;
+            } else {
+                return { success: true, accounts: [] }; 
+            }
+        }
+
+        const accounts = await Account.find(query).populate('user');
         return { success: true, accounts };
     } catch (error) {
         return { success: false, error: error.message };

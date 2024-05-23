@@ -58,13 +58,9 @@ async function login(phoneNumber, password) {
 }
 
 
-async function list(data={}) {
+async function list(role) {
   try {
-    const { type } = data;
-    let query = {};
-    if (type) {
-      query = { type };
-    }
+    const query = role ? { role } : {};
     const users = await User.find(query)
     return { success: true, users };
   } catch (error) {

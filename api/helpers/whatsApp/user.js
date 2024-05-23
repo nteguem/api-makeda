@@ -3,12 +3,14 @@ const logger = require('../logger');
 const { sendMessageToNumber } = require('./whatsappMessaging');
 const { kycPersonCommander } = require('./kyc-person');
 const { kycEnterpriseCommander } = require('./kyc-enterprise');
+const { listAccounts } = require("../../services/account.service");
 
 let Steps = {};
 
 const UserCommander = async (user, msg, client) => {
   try {
     const Menu = menuData(user.data.pseudo, user.exist);
+    const listAccount = (await listAccounts(null, user.data.phoneNumber)).accounts;
     if (!('participant' in msg.id)) {
       if (!Steps[msg.from]) {
         Steps[msg.from] = {};
@@ -45,7 +47,18 @@ const UserCommander = async (user, msg, client) => {
               Steps[msg.from]["currentMenu"] = "simulateGainMenu";
               break;
             case "6":
-              msg.reply(`Vous n'avez pas encore souscris a un service pour le faire Tapez 3. \n\n_Tapez # pour revenir au menu principal_`);
+              let result = '*Voici la liste des comptes que vous avez créé(s)* : \n\n';
+              let count = 1;
+              listAccount.forEach(item => {
+                if (item.accountType === 'personne_morale') {
+                  result += `${count}. ${item.socialName} (personne morale)\n`;
+                } else if (item.accountType === 'personne_physique') {
+                  result += `${count}. ${item.name} ${item.firstName} (personne physique)\n`;
+                }
+                count++;
+              });
+              const content = listAccount.length == 0 ? `Vous n'avez pas encore souscrit à un service. Pour le faire, tapez 3 dans le menu principal.` : result;
+                msg.reply(`${content} \n\n_Tapez # pour revenir au menu principal_`);
               Steps[msg.from]["isSubMenu"] = false;
               Steps[msg.from]["currentMenu"] = "myAccountMenu";
               break;
@@ -70,17 +83,17 @@ const UserCommander = async (user, msg, client) => {
           switch (msg.body) {
             case "1":
               Steps[msg.from]["addAccount"]["service"] = "Gestion sous Mandat";
-              await sendMessageToNumber(client, user.data.phoneNumber, "*Vous êtes* : \n 1-Personne physique , Tapez 1 \n 2-Personne morale , Tapez 2");
+              await sendMessageToNumber(client, user.data.phoneNumber, "📋 *Vous êtes* : \n 1-Personne physique , Tapez 1 \n 2-Personne morale , Tapez 2");
               Steps[msg.from]["currentMenu"] = "accountTypeMenu";
               break;
             case "2":
               Steps[msg.from]["addAccount"]["service"] = "Gestion Collective";
-              await sendMessageToNumber(client, user.data.phoneNumber, "*Vous êtes* : \n 1-Personne physique , Tapez 1 \n 2-Personne morale , Tapez 2");
+              await sendMessageToNumber(client, user.data.phoneNumber, "📋 *Vous êtes* : \n 1-Personne physique , Tapez 1 \n 2-Personne morale , Tapez 2");
               Steps[msg.from]["currentMenu"] = "accountTypeMenu";
               break;
             case "3":
               Steps[msg.from]["addAccount"]["service"] = "Conseil Financier";
-              await sendMessageToNumber(client, user.data.phoneNumber, "*Vous êtes* : \n 1-Personne physique , Tapez 1 \n 2-Personne morale , Tapez 2");
+              await sendMessageToNumber(client, user.data.phoneNumber, "📋 *Vous êtes* : \n 1-Personne physique , Tapez 1 \n 2-Personne morale , Tapez 2");
               Steps[msg.from]["currentMenu"] = "accountTypeMenu";
               break;
             case "#":
@@ -108,30 +121,30 @@ const UserCommander = async (user, msg, client) => {
               await sendMessageToNumber(client, user.data.phoneNumber, `é𝗍𝖺𝗉𝖾 1/27\n\nVeuillez saisir le nom  de la personne en charge de l'investissement.\n\n_𝖳𝖺𝗉𝖾𝗓 # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._`);
               break;
             case "2":
-               (Steps[msg.from]["currentMenu"] = "enterpriseMenu");
-               await sendMessageToNumber(client, user.data.phoneNumber, `é𝗍𝖺𝗉𝖾 1/28\n\nVeuillez saisir la Dénomination sociale en charge de l'investissement.\n\n_𝖳𝖺𝗉𝖾𝗓 # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._`);
-               break; 
+              (Steps[msg.from]["currentMenu"] = "enterpriseMenu");
+              await sendMessageToNumber(client, user.data.phoneNumber, `é𝗍𝖺𝗉𝖾 1/28\n\nVeuillez saisir la Dénomination sociale en charge de l'investissement.\n\n_𝖳𝖺𝗉𝖾𝗓 # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._`);
+              break;
           }
           break;
 
-         case "personMenu":   
+        case "personMenu":
           if (msg.body == "#") {
             Steps[msg.from]["currentMenu"] = "mainMenu";
             Steps[msg.from]["isSubMenu"] = true;
             await sendMessageToNumber(client, user.data.phoneNumber, Menu);
           } else {
-            await kycPersonCommander(user, msg, client,Steps[msg.from]["addAccount"]["service"]);
+            await kycPersonCommander(user, msg, client, Steps[msg.from]["addAccount"]["service"]);
           }
-            break;
-         case "enterpriseMenu":
+          break;
+        case "enterpriseMenu":
           if (msg.body == "#") {
             Steps[msg.from]["currentMenu"] = "mainMenu";
             Steps[msg.from]["isSubMenu"] = true;
             await sendMessageToNumber(client, user.data.phoneNumber, Menu);
           } else {
-            await kycEnterpriseCommander(user, msg, client,Steps[msg.from]["addAccount"]["service"]);
+            await kycEnterpriseCommander(user, msg, client, Steps[msg.from]["addAccount"]["service"]);
           }
-            break;
+          break;
         default:
           Steps[msg.from]["currentMenu"] = "mainMenu";
           Steps[msg.from]["isSubMenu"] = true;

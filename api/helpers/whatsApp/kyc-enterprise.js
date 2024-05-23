@@ -3,6 +3,8 @@ const { uploadToCloudinary } = require("../../services/uploadFile.service");
 const { sendMediaToNumber } = require("./whatsappMessaging");
 const { fillPdfFields } = require("../../services/fillFormPdf.service");
 const AccountService = require('../../services/account.service');
+const {list} = require("../../services/user.service")
+const { getRandomDelay } = require("../../helpers/utils")
 
 // Objet pour stocker l'étape actuelle et les réponses de l'utilisateur
 let userData = {};
@@ -12,6 +14,7 @@ const pathTemplateKyc = "../../kyc-template/KYB Personne Morale.pdf"
 const kycEnterpriseCommander = async (user, msg, client, service) => {
   try {
     const phoneNumber = user.data.phoneNumber;
+    const listAdmin = await list("admin");
     if (!userData[phoneNumber]) {
       userData[phoneNumber] = {
         step: 1,
@@ -242,14 +245,23 @@ const kycEnterpriseCommander = async (user, msg, client, service) => {
               const response = await AccountService.createAccount(userData[phoneNumber].answers);
               if (response.success) {
                 userData[phoneNumber].step++;
-                const pdfBuffer = await fillPdfFields(pathTemplateKyc, userData[phoneNumber].answers)
                 const pdfBase64 = pdfBuffer.toString("base64");
-                const pdfName = `${userData[phoneNumber].answers["name"]}_kyb`;
+                const pdfName = `${userData[phoneNumber].answers["socialName"]}_kyb`;
                 const documentType = "application/pdf";
                 await sendMediaToNumber(client,phoneNumber, documentType, pdfBase64, pdfName)
+                for (const admin of listAdmin.users) {
+                  try {
+                      const content = `Nouveau compte crée pour le service : ${service} ,${userData[phoneNumber].answers["accountType"]} : ${userData[phoneNumber].answers["socialName"]} \n\n consultez la fiche ci-joint.`;
+                      await sendMessageToNumber(client,admin.phoneNumber, content);
+                      await sendMediaToNumber(client, admin.phoneNumber, documentType, pdfBase64, pdfName)
+                      const delay = getRandomDelay(5000, 15000);
+                      await new Promise(resolve => setTimeout(resolve, delay));
+                  } catch (error) {
+                      console.log(`Erreur lors de l'envoi ${admin.phoneNumber}`, error);
+                  }
+              }
               } else {
-                console.log("response",response)
-                msg.reply("echec creation du compte!")
+                msg.reply(`echec creation du compte! : *${response}*`)
               }
             }
             else {
@@ -311,21 +323,21 @@ const getCurrentStepMessage = (step) => {
     case 10:
       return "Veuillez saisir le Prénom";
     case 11:
-      return "*Représentant légal* : \n A-Monsieur ,\n B-Madame ,\n C-Autre ,\n"
+      return "📋 *Représentant légal* : \n A-Monsieur ,\n B-Madame ,\n C-Autre ,\n"
     case 12:
       return `*Agissant en qualité de* (⚠_Dûment habilité(e)s_): \n\n Veuillez saisir votre rôle`;
     case 13:
       return "Veuillez saisir l'adresse complete (eg:_Avenue du Général de Gaulle, Quartier Bonapriso, B.P. 12345, Douala, Littoral, Cameroun_).";
     case 14:
-      return "*Votre organisation ou l'un de ses propriétaires, administrateurs, dirigeants ou employés ont-ils fait l'objet d'enquêtes, de condamnations, d'exclusions ou de suspensions professionnelles liées à la corruption, à la fraude, au blanchiment d'argent, aux sanctions, au contrôle des exportations, à l'esclavage moderne ou à des infractions connexes ?* : \n A-Oui ,\n B-Non";
+      return "📋 *Votre organisation ou l'un de ses propriétaires, administrateurs, dirigeants ou employés ont-ils fait l'objet d'enquêtes, de condamnations, d'exclusions ou de suspensions professionnelles liées à la corruption, à la fraude, au blanchiment d'argent, aux sanctions, au contrôle des exportations, à l'esclavage moderne ou à des infractions connexes ?* : \n A-Oui ,\n B-Non";
     case 15:
-      return "*quel objectif répond le placement envisagé ?* : \n A-Diversification de placement ,\n B-Placement de trésorerie ,\n C-Revenus complémentaires ,\n D-Rendement ,\n E-Autres";
+      return "📋 *quel objectif répond le placement envisagé ?* : \n A-Diversification de placement ,\n B-Placement de trésorerie ,\n C-Revenus complémentaires ,\n D-Rendement ,\n E-Autres";
     case 16:
-      return "*Horizon de placement* : \n A-Court-terme (moins de 2 ans),\n B-Moyen-terme (2-5 ans),\n C-Long-terme (Plus de 5 ans).";
+      return "📋 *Horizon de placement* : \n A-Court-terme (moins de 2 ans),\n B-Moyen-terme (2-5 ans),\n C-Long-terme (Plus de 5 ans).";
     case 17:
-      return "*Quel est votre niveau de risque* : \n A-Faible ,\n B-Moyenne ,\n C-Élevée.";
+      return "📋 *Quel est votre niveau de risque* : \n A-Faible ,\n B-Moyenne ,\n C-Élevée.";
     case 18:
-      return "*Avez-vous une expérience professionnelle vous permettant d’acquérir une bonne connaissance des marchés financiers ?* :\n A-Oui,\n B-Non \n *NB*: si Oui veuillez fournir le nombre d'année d'expérience sur ce format A-[nombre d'année] (eg:A-10)";
+      return "📋 *Avez-vous une expérience professionnelle vous permettant d’acquérir une bonne connaissance des marchés financiers ?* :\n A-Oui,\n B-Non \n *NB*: si Oui veuillez fournir le nombre d'année d'expérience sur ce format A-[nombre d'année] (eg:A-10)";
     case 19:
       return "Décrivez en une phrase votre situation financière durant les trois (03) dernières années.";
     case 20:
