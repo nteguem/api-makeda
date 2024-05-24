@@ -3,6 +3,8 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require("../models/user.model");
 const {addUserToGroupByPhoneNumber} = require("./group.service")
+const {DefaultGroupNames} = require("../data/defaultGroups");
+
 async function save(phoneNumber, contactName) {
   try {
     const user = await User.findOne({ phoneNumber: phoneNumber });
@@ -15,9 +17,9 @@ async function save(phoneNumber, contactName) {
       });
 
       const user = await newUser.save();
-      await addUserToGroupByPhoneNumber("Groupe de tous les utilisateurs",phoneNumber)
+      await addUserToGroupByPhoneNumber(DefaultGroupNames.GROUPE_TOUS_LES_UTILISATEURS,phoneNumber)
       return {
-        exist: false,
+        exist: false, 
         data: user,
         message: "User created successfully.",
       };

@@ -1,6 +1,7 @@
 const Group = require('../models/group.model');
 const User = require('../models/user.model');
 const { generateAndDownloadCSV } = require('./generateCsv.service');
+const {defaultGroups} = require("../data/defaultGroups");
 
 async function createGroup(groupData) {
   try {
@@ -106,41 +107,10 @@ async function addUserToGroupByPhoneNumber(groupName, phoneNumber) {
 
 
 async function ensureDefaultGroupsExist() {
-  const defaultGroups = [
-    { 
-        name: 'Groupe Personne physique', 
-        description: 'Groupe des utilisateurs individuels ou particuliers ayant ouvert un compte lié à un service.' 
-    },
-    { 
-        name: 'Groupe Personne morale', 
-        description: 'Groupe des utilisateurs représentant des entités juridiques, telles que des entreprises ou des organisations ayant ouvert un compte lié à un service.' 
-    },
-    { 
-        name: 'Groupe Gestion sous Mandat', 
-        description: 'Groupe des utilisateurs ayant souscrit au service de gestion sous mandat.' 
-    },
-    { 
-        name: 'Groupe Gestion Collective', 
-        description: 'Groupe des utilisateurs ayant souscrit au service de gestion collective.' 
-    },
-    { 
-        name: 'Groupe Conseil Financier', 
-        description: 'Groupe des utilisateurs ayant souscrit au service de conseils financiers.' 
-    },
-    { 
-        name: "Groupe d'utilisateurs avec au moins un compte", 
-        description: 'Groupe des utilisateurs ayant créé au moins un compte lié à un service.' 
-    },
-    { 
-        name: "Groupe de tous les utilisateurs", 
-        description: 'Groupe de tous ceux qui ont écrit au moins une fois au bot WhatsApp.' 
-    }
-];
-
   try {
     for (const defaultGroup of defaultGroups) {
       const groupExists = await Group.findOne({ name: defaultGroup.name });
-      if (!groupExists) {
+      if (!groupExists) { 
         await createGroup(defaultGroup);
         console.log(`Default group ${defaultGroup.name} created.`);
       }
