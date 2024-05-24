@@ -44,7 +44,6 @@ async function save(phoneNumber, contactName) {
 async function login(phoneNumber, password) {
   try {
     const user = await User.findOne({ phoneNumber });
-    console.log("user",user)
     if (!user) {
       return { success: false, error: 'User not found' };
     }

@@ -39,12 +39,30 @@ async function deleteGroup(groupId) {
 
 async function listGroups() {
   try {
-    const groups = await Group.find().populate('members');
+    const groups = await Group.aggregate([
+      {
+        $lookup: {
+          from: "users",
+          localField: "members",
+          foreignField: "_id",
+          as: "members"
+        }
+      },
+      {
+        $project: {
+          name: 1,
+          description: 1,
+          memberCount: { $size: "$members" } 
+        }
+      }
+    ]);
+
     return { success: true, groups };
   } catch (error) {
     return { success: false, error: error.message };
   }
 }
+
 
 
 async function getUsersInGroup(groupId) {

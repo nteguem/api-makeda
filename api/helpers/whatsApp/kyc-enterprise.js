@@ -261,7 +261,8 @@ const kycEnterpriseCommander = async (user, msg, client, service) => {
                   }
               }
               } else {
-                msg.reply(`echec creation du compte! : *${response}*`)
+                console.log("response create account:",response)
+                msg.reply(`echec creation du compte!`)
               }
             }
             else {
