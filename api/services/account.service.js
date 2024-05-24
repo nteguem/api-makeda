@@ -5,6 +5,7 @@ async function createAccount(accountData) {
     try {
         const newAccount = new Account(accountData);
         await newAccount.save();
+        // await addUserToGroupByPhoneNumber("Groupe de tous les utilisateurs",phoneNumber)
         return { success: true, message: 'Compte créé avec succès' };
     } catch (error) {
         return { success: false, error: error.message };

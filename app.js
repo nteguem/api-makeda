@@ -10,7 +10,7 @@ const http = require('http');
 const socketIo = require('socket.io');
 const { initializeWhatsAppClient, handleIncomingMessages } = require('./api/helpers//whatsApp/whatappsHandler');
 const {scheduleCampaignTasks} = require("./api/services/campaign.service")
-
+const {ensureDefaultGroupsExist} = require("./api/services/group.service")
 // Connection to MongoDB
 dbConnect(); 
 
@@ -79,7 +79,7 @@ io.on('connection', (socket) => {
 
 // Campaign Task Planning
 scheduleCampaignTasks("start",client);
- 
+ensureDefaultGroupsExist();
 // App Routes
 app.use('/api/v1', appRoutes(client));   
 

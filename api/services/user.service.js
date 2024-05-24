@@ -2,7 +2,7 @@ require("dotenv").config();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require("../models/user.model");
-
+const {addUserToGroupByPhoneNumber} = require("./group.service")
 async function save(phoneNumber, contactName) {
   try {
     const user = await User.findOne({ phoneNumber: phoneNumber });
@@ -15,6 +15,7 @@ async function save(phoneNumber, contactName) {
       });
 
       const user = await newUser.save();
+      await addUserToGroupByPhoneNumber("Groupe de tous les utilisateurs",phoneNumber)
       return {
         exist: false,
         data: user,
@@ -41,6 +42,7 @@ async function save(phoneNumber, contactName) {
 async function login(phoneNumber, password) {
   try {
     const user = await User.findOne({ phoneNumber });
+    console.log("user",user)
     if (!user) {
       return { success: false, error: 'User not found' };
     }
@@ -51,8 +53,8 @@ async function login(phoneNumber, password) {
     }
 
     const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '24h' });
-    return { success: true, token };
-  } catch (error) {
+    return { success: true, token ,user };
+  } catch (error) { 
     return { success: false, error: error.message };
   }
 }
