@@ -11,6 +11,18 @@ const getAllUser = async (req, res) => {
   }
 };
 
+const updateUser = async (req, res) => {
+  const {...updatedData} = req.body;
+  const phoneNumber = req.query.phoneNumber;
+  const response = await userService.update(phoneNumber, updatedData);
+
+  if (response.success) {
+    return ResponseService.success(res, { users: response.users });
+  } else {
+    return ResponseService.notFound(res, { message: response.error });
+  }
+}
+
 const login = async (req, res) => {
   const { phoneNumber, password } = req.body;
   const response = await userService.login(phoneNumber, password);
@@ -24,4 +36,5 @@ const login = async (req, res) => {
 module.exports = {
   getAllUser,
   login,
+  updateUser
 };

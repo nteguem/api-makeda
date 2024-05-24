@@ -11,6 +11,7 @@ const setupUserRoutes = (app) => {
     app.use("/user", router);
     router.get('/list', userHandler.getAllUser);
     router.post('/login', userHandler.login);
+    router.put('/update', userHandler.updateUser);
   };
   
   module.exports = { setupUserRoutes };

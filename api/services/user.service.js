@@ -61,6 +61,29 @@ async function login(phoneNumber, password) {
   }
 }
 
+async function update(phoneNumber, updatedData) { 
+  try {
+    const updatedUser = await User.findOneAndUpdate(
+      { phoneNumber: phoneNumber },
+      { $set: updatedData },
+      { new: true } // Ceci renvoie le document mis à jour plutôt que l'ancien
+    );
+    if (updatedUser) {
+      return {
+        success: true,
+        message: "Utilisateur mis à jour avec succès",
+        user: updatedUser,
+      };
+    } else {
+      return { success: false, message: "Utilisateur non trouvé" };
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: "Erreur lors de la mise à jour de l'utilisateur",
+    };
+  }
+}
 
 async function list(role) {
   try {
@@ -76,4 +99,5 @@ module.exports = {
   save,
   login,
   list,
+  update
 };
