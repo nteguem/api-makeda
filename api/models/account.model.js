@@ -13,9 +13,9 @@ const accountSchema = new Schema({
     required: true
   },
   verified: {
-    type: Boolean,
-    enum: [true, false],
-    default: false
+    type: String,
+    enum: ['pending', 'approved', 'rejected'],
+    default: 'pending'
   },
   accountType: {
     type: String,
