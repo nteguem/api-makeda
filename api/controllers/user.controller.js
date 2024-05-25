@@ -5,7 +5,7 @@ const getAllUser = async (req, res) => {
   const role = req.query.role;
   const response = await userService.list(role)
   if (response.success) {
-    return ResponseService.success(res, { users: response.users });
+    return ResponseService.success(res, { users: response.users,total:response.total });
   } else {
     return ResponseService.internalServerError(res, { error: response.error });
   }

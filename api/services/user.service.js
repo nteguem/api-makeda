@@ -114,8 +114,11 @@ async function list(role) {
         }
       }
     ]);
-
-    return { success: true, users };
+    if (users.length > 0) {
+      return { success: true, total: users.length, users: users };
+    } else {
+      return { success: true, total: 0, users: [] };
+    }
   } catch (error) {
     return { success: false, error: error.message };
   }
