@@ -26,7 +26,7 @@ const setupAppRoutes = (client) => {
   setupProduct(app);
   setupCampaign(app,client);
   setupGroup(app);
-  setupAccount(app);
+  setupAccount(app,client);
   return app;
 }
 

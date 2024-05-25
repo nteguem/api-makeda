@@ -2,6 +2,7 @@ const Account = require('../models/account.model');
 const User = require('../models/user.model');
 const { DefaultGroupNames } = require("../data/defaultGroups");
 const {addUserToGroupByPhoneNumber} = require("./group.service")
+const {sendMessageToNumber} = require('../helpers/whatsApp/whatsappMessaging')
 
 async function createAccount(accountData) {
     try {
@@ -31,12 +32,24 @@ async function createAccount(accountData) {
 }
 
 
-async function updateAccount(accountId, updatedData) {
-    try {
+async function updateAccount(accountId, updatedData,client) {
+    try {       
         const account = await Account.findByIdAndUpdate(accountId, updatedData, { new: true });
+        const user = await User.findById(account.user);
+        const userPhoneNumber = user.phoneNumber;
         if (!account) {
             return { success: false, error: 'Compte non trouvé' };
         }
+        if(updatedData.verified === "rejected")
+            {
+                await sendMessageToNumber(client,userPhoneNumber,`*Rejet de votre demande de création de compte*\n\n${account.rejectionReason}`);
+            }
+            else
+            {
+                await sendMessageToNumber(client, userPhoneNumber,  
+                    `*Approbation de votre demande de création de compte*\n\n 1-compte : ${account.accountType === "personne_physique" ? `${account.name} ${account.firstName}` : account.socialName}\n 2-service : ${account.service}\n 3-type : ${account.accountType}\n\n L'équipe Makeda Asset Management vous contactera rapidement pour assurer le suivi de votre compte.`
+                );
+            }
         return { success: true, message: 'Compte mis à jour avec succès', account };
     } catch (error) {
         return { success: false, error: error.message };
@@ -45,7 +58,6 @@ async function updateAccount(accountId, updatedData) {
 
 async function deleteAccount(accountId) {
     try {
-        // await sendMessageToNumber(client,phoneNumber, stepMessage + additionalMessage);
 
         const account = await Account.findByIdAndDelete(accountId);
         if (!account) {

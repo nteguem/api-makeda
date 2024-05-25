@@ -11,10 +11,10 @@ async function createAccount(req, res) {
     }
 }
 
-async function updateAccount(req, res) {
+async function updateAccount(req, res, client) {
     const accountId = req.query.id;
     const updatedData = req.body;
-    const response = await AccountService.updateAccount(accountId, updatedData);
+    const response = await AccountService.updateAccount(accountId, updatedData,client);
     if (response.success) {
         return ResponseService.success(res, { message: response.message, account: response.account });
     } else {
