@@ -45,6 +45,8 @@ async function updateAccount(accountId, updatedData) {
 
 async function deleteAccount(accountId) {
     try {
+        // await sendMessageToNumber(client,phoneNumber, stepMessage + additionalMessage);
+
         const account = await Account.findByIdAndDelete(accountId);
         if (!account) {
             return { success: false, error: 'Compte non trouvé' };

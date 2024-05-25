@@ -17,6 +17,9 @@ const accountSchema = new Schema({
     enum: ['pending', 'approved', 'rejected'],
     default: 'pending'
   },
+  rejectionReason:{
+    type: String,
+  },
   accountType: {
     type: String,
     enum: ['personne_morale', 'personne_physique'],
