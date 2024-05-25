@@ -86,8 +86,35 @@ async function update(phoneNumber, updatedData) {
 
 async function list(role) {
   try {
-    const query = role ? { role } : {};
-    const users = await User.find(query)
+    const matchStage = role ? { role } : {};
+
+    const users = await User.aggregate([
+      { $match: matchStage },
+      {
+        $lookup: {
+          from: "groups",
+          localField: "_id",
+          foreignField: "members",
+          as: "groups"
+        }
+      },
+      {
+        $project: {
+          pseudo: 1,
+          phoneNumber: 1,
+          fullname: 1,
+          location: 1,
+          email: 1,
+          engagementLevel: 1,
+          role: 1,
+          referralCode: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          groups: { $map: { input: "$groups", as: "group", in: "$$group.name" } } // Map to get group names
+        }
+      }
+    ]);
+
     return { success: true, users };
   } catch (error) {
     return { success: false, error: error.message };
