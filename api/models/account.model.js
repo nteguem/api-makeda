@@ -12,6 +12,11 @@ const accountSchema = new Schema({
     type: String,
     required: true
   },
+  verified: {
+    type: Boolean,
+    enum: [true, false],
+    default: false
+  },
   accountType: {
     type: String,
     enum: ['personne_morale', 'personne_physique'],
