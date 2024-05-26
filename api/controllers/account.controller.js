@@ -44,7 +44,7 @@ async function listAccounts(req, res) {
     const { service, phoneNumber } = req.query;
     const response = await AccountService.listAccounts(service, phoneNumber);
     if (response.success) {
-        return ResponseService.success(res, { accounts: response.accounts });
+        return ResponseService.success(res, { accounts: response.accounts,totals:response.totals });
     } else {
         return ResponseService.internalServerError(res, { error: response.error });
     }

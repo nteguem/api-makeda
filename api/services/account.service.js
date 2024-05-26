@@ -81,16 +81,41 @@ async function listAccounts(service, phoneNumber) {
             if (user) {
                 query.user = user._id;
             } else {
-                return { success: true, accounts: [] };
+                return {
+                    success: true,
+                    accounts: [],
+                    totals: {
+                        totalAccounts: 0,
+                        totalVerified: 0,
+                        totalPending: 0,
+                        totalRejected: 0
+                    }
+                };
             }
         }
 
         const accounts = await Account.find(query).populate('user');
-        return { success: true, accounts };
+
+        const totalAccounts = accounts.length;
+        const totalVerified = accounts.filter(account => account.verified === 'approved').length;
+        const totalPending = accounts.filter(account => account.verified === 'pending').length;
+        const totalRejected = accounts.filter(account => account.verified === 'rejected').length;
+
+        return {
+            success: true,
+            accounts,
+            totals: {
+                totalAccounts,
+                totalVerified,
+                totalPending,
+                totalRejected
+            }
+        };
     } catch (error) {
         return { success: false, error: error.message };
     }
 }
+
 
 module.exports = {
     createAccount,
