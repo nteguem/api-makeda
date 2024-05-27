@@ -1,5 +1,6 @@
 const Product = require('../models/product.model');
 const ResponseService = require('./response.service');
+const logger = require("../helpers/logger")
 
 async function createProduct(req, res) {
   try {

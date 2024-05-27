@@ -4,6 +4,7 @@ const {sendMessageToNumber} = require('../helpers/whatsApp/whatsappMessaging')
 const {list} = require('./user.service')
 const { getRandomDelay } = require("../helpers/utils")
 const {getUsersInGroup} = require("./group.service")
+const logger = require("../helpers/logger")
 
 let tasks = {};
 async function createCampaign(campaignData, client) {
@@ -22,6 +23,7 @@ async function createCampaign(campaignData, client) {
     await updateCampaignTasks(client);
     return { success: true, message: 'Campagne créée avec succès' };
   } catch (error) {
+    logger(client).error('Error create campaign:', error);
     return { success: false, error: error.message };
   }
 }
@@ -40,6 +42,8 @@ async function updateCampaign(campaignId, updatedData, client) {
     await updateCampaignTasks(client);
     return { success: true, message: 'Campagne mise à jour avec succès', campaign };
   } catch (error) {
+    logger(client).error('Error update campaign:', error);
+
     return { success: false, error: error.message };
   }
 }
@@ -53,6 +57,7 @@ async function deleteCampaign(campaignId, client) {
     await updateCampaignTasks(client);
     return { success: true, message: 'Campagne supprimée avec succès' };
   } catch (error) {
+    logger(client).error('Error delete campaign:', error);
     return { success: false, error: error.message };
   }
 }
@@ -67,6 +72,7 @@ async function listCampaigns(data,client) {
     const campaigns = await Campaign.find(query, {__v:0 }).populate({ path: 'groups', select: '-members -__v' });
     return { success: true, campaigns };
   } catch (error) {
+    logger(client).error('Error list campaigns:', error);
     return { success: false, error: error.message };
   }
 }
@@ -90,13 +96,13 @@ async function sendCampaignWhatapp(client, campaign) {
                 const delay = getRandomDelay(5000, 15000);
                 await new Promise(resolve => setTimeout(resolve, delay));
             } catch (error) {
-                console.log(`Erreur lors de l'envoi de la campagne sur WhatsApp pour ${targetUser.pseudo}`, error);
+              logger(client).error(`Erreur lors de l'envoi de la campagne sur WhatsApp pour ${targetUser.pseudo}`, error);
             }
         }
     }
       
   } catch (error) {
-      console.log(`Erreur lors de l'envoi de la campagne sur WhatsApp`, error);
+    logger(client).error(`Erreur lors de l'envoi de la campagne sur WhatsApp`, error);
   }
   //  finally {
   //     console.log("Liste des utilisateurs ayant reçu la campagne avec succès :\n ", successfulTargets);

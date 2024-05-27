@@ -2,18 +2,20 @@ const Group = require('../models/group.model');
 const User = require('../models/user.model');
 const { generateAndDownloadCSV } = require('./generateCsv.service');
 const {defaultGroups} = require("../data/defaultGroups");
+const logger = require("../helpers/logger")
 
-async function createGroup(groupData) {
+async function createGroup(groupData,client) {
   try {
     const newGroup = new Group(groupData);
     await newGroup.save();
     return { success: true, message: 'Groupe créé avec succès' };
   } catch (error) {
+    logger(client).error('Error create group:', error);
     return { success: false, error: error.message };
   }
 }
 
-async function updateGroup(groupId, updatedData) {
+async function updateGroup(groupId, updatedData,client) {
   try {
     const group = await Group.findByIdAndUpdate(groupId, updatedData, { new: true });
     if (!group) {
@@ -21,11 +23,12 @@ async function updateGroup(groupId, updatedData) {
     }
     return { success: true, message: 'Groupe mis à jour avec succès', group };
   } catch (error) {
+    logger(client).error('Error update group:', error);
     return { success: false, error: error.message };
   }
 }
 
-async function deleteGroup(groupId) {
+async function deleteGroup(groupId,client) {
   try {
     const group = await Group.findByIdAndDelete(groupId);
     if (!group) {
@@ -33,11 +36,12 @@ async function deleteGroup(groupId) {
     }
     return { success: true, message: 'Groupe supprimé avec succès' };
   } catch (error) {
+    logger(client).error('Error delete group:', error);
     return { success: false, error: error.message };
   }
 }
 
-async function listGroups() {
+async function listGroups(client) {
   try {
     const groups = await Group.aggregate([
       {
@@ -59,6 +63,7 @@ async function listGroups() {
 
     return { success: true, groups };
   } catch (error) {
+    logger(client).error('Error list group:', error);
     return { success: false, error: error.message };
   }
 }
@@ -90,7 +95,7 @@ async function download(idGroup) {
     });
     return generateAndDownloadCSV(formattedUsers, result.groupName)
   } catch (error) {
-    throw new Error('Error generating CSV file', error);
+    console.log('Error generating CSV file', error)
   }
 }
 

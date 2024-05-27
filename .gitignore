@@ -9,3 +9,5 @@ data/*
 uploads
 .env
 .vercel
+.logger.log
+logger.log

@@ -1,5 +1,6 @@
 const csvWriter = require('csv-writer').createObjectCsvWriter;
 const fs = require("fs");
+const logger = require("../helpers/logger")
 
 async function generateAndDownloadCSV(data,nameFile) {
     try {
@@ -15,7 +16,7 @@ async function generateAndDownloadCSV(data,nameFile) {
   
       return `${nameFile}_list.csv`; // Return the path of the created CSV file
     } catch (error) {
-      throw new Error('Error generating CSV file', error);
+      console.log('Error generating CSV file', error)
     }
   }
   

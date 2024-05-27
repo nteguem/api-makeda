@@ -3,8 +3,9 @@ const User = require('../models/user.model');
 const { DefaultGroupNames } = require("../data/defaultGroups");
 const {addUserToGroupByPhoneNumber} = require("./group.service")
 const {sendMessageToNumber} = require('../helpers/whatsApp/whatsappMessaging')
+const logger = require("../helpers/logger")
 
-async function createAccount(accountData) {
+async function createAccount(accountData,client) {
     try {
         const newAccount = new Account(accountData);
         await newAccount.save();
@@ -27,6 +28,7 @@ async function createAccount(accountData) {
 
         return { success: true, message: 'Compte créé avec succès' };
     } catch (error) {
+        logger(client).error('Error createAccount:', error);
         return { success: false, error: error.message };
     }
 }
@@ -52,11 +54,12 @@ async function updateAccount(accountId, updatedData,client) {
             }
         return { success: true, message: 'Compte mis à jour avec succès', account };
     } catch (error) {
+        logger(client).error('Error updateAccount:', error);
         return { success: false, error: error.message };
     }
 }
 
-async function deleteAccount(accountId) {
+async function deleteAccount(accountId,client) {
     try {
 
         const account = await Account.findByIdAndDelete(accountId);
@@ -65,11 +68,12 @@ async function deleteAccount(accountId) {
         }
         return { success: true, message: 'Compte supprimé avec succès' };
     } catch (error) {
+        logger(client).error('Error deleteAccount:', error);
         return { success: false, error: error.message };
     }
 }
 
-async function listAccounts(service, phoneNumber) {
+async function listAccounts(service, phoneNumber,client) {
     try {
         let query = {};
         if (service) {
@@ -112,6 +116,7 @@ async function listAccounts(service, phoneNumber) {
             }
         };
     } catch (error) {
+        logger(client).error('Error listAccounts:', error);
         return { success: false, error: error.message };
     }
 }

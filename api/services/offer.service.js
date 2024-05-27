@@ -1,5 +1,6 @@
 const Offer = require('../models/offer.model');
 const ResponseService = require('./response.service');
+const logger = require("../helpers/logger")
 
 async function createOffer(req, res) {
   try {

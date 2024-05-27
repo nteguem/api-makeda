@@ -4,8 +4,9 @@ const jwt = require('jsonwebtoken');
 const User = require("../models/user.model");
 const {addUserToGroupByPhoneNumber} = require("./group.service")
 const {DefaultGroupNames} = require("../data/defaultGroups");
+const logger = require("../helpers/logger")
 
-async function save(phoneNumber, contactName) {
+async function save(phoneNumber, contactName,client) {
   try {
     const user = await User.findOne({ phoneNumber: phoneNumber });
     if (!user) {
@@ -34,6 +35,7 @@ async function save(phoneNumber, contactName) {
       }
     }
   } catch (error) {
+    logger(client).error('Error create user:', error);
     return {
       error: error,
       message: "We're sorry, but an internal server error has occurred. Our team has been alerted and is working to resolve the issue. Please try again later.",
@@ -41,11 +43,14 @@ async function save(phoneNumber, contactName) {
   }
 }
 
-async function login(phoneNumber, password) {
+async function login(phoneNumber, password,client) {
   try {
     const user = await User.findOne({ phoneNumber });
     if (!user) {
       return { success: false, error: 'User not found' };
+    }
+    if (user.role !== 'admin') {
+      return { success: false, error: 'Access denied' };
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -54,13 +59,15 @@ async function login(phoneNumber, password) {
     }
 
     const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '24h' });
-    return { success: true, token ,user };
-  } catch (error) { 
+    return { success: true, token, user };
+  } catch (error) {
+    logger(client).error('Error login user:', error);
     return { success: false, error: error.message };
   }
 }
 
-async function update(phoneNumber, updatedData) { 
+
+async function update(phoneNumber, updatedData,client) { 
   try {
     const updatedUser = await User.findOneAndUpdate(
       { phoneNumber: phoneNumber },
@@ -77,6 +84,7 @@ async function update(phoneNumber, updatedData) {
       return { success: false, message: "Utilisateur non trouvé" };
     }
   } catch (error) {
+    logger(client).error('Error update user:', error);
     return {
       success: false,
       message: "Erreur lors de la mise à jour de l'utilisateur",
@@ -84,7 +92,20 @@ async function update(phoneNumber, updatedData) {
   }
 }
 
-async function list(role) {
+async function getOne(referralCode) {
+  try {
+    const user = await User.findOne({ referralCode })
+    if (user) {
+      return { success: true, user };
+    } else {
+      return { success: false, message: "User not found" };
+    }
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+async function list(role,client) {
   try {
     const matchStage = role ? { role } : {};
 
@@ -120,6 +141,7 @@ async function list(role) {
       return { success: true, total: 0, users: [] };
     }
   } catch (error) {
+    logger(client).error('Error list user:', error);
     return { success: false, error: error.message };
   }
 }

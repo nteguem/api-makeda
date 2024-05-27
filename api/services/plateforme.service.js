@@ -1,5 +1,6 @@
 const Plateforme = require('../models/plateforme.model');
 const ResponseService = require('./response.service');
+const logger = require("../helpers/logger")
 
 async function createPlateforme(req, res) {
   try {

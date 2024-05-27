@@ -20,12 +20,12 @@ router.get('/', function(req, res, next) {
  */
 const setupAppRoutes = (client) => {
   const app = router;
-  setupUserRoutes(app);
+  setupUserRoutes(app,client);
   setupPlateforme(app);
   setupOffer(app);
   setupProduct(app);
   setupCampaign(app,client);
-  setupGroup(app);
+  setupGroup(app,client);
   setupAccount(app,client);
   return app;
 }

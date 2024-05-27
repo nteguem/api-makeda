@@ -163,6 +163,5 @@ const UserCommander = async (user, msg, client) => {
 };
 
 module.exports = {
-  UserCommander,
-  Steps
+  UserCommander
 };

@@ -10,7 +10,6 @@ Votre avenir financier, notre expertise personnalisée 🤝`;
 
 const adminMenuContent = `
 1️⃣ Faire une campagne, tapez 1.
-2️⃣ Voir les comptes ouverts sur une période spécifique, tapez 2.
 
 Administration - Optimisez vos opérations avec efficacité et précision 🚀`;
 

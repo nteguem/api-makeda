@@ -1,12 +1,27 @@
 const { adminMenuData } = require("../../data");
 const logger = require('../logger');
 const { sendMessageToNumber } = require('./whatsappMessaging');
+const { listGroups } = require("../../services/group.service");
+const { createCampaign } = require("../../services/campaign.service");
 
 let Steps = {};
-let serviceChoice;
-const AdminCommander = async (user, msg,client) => {
+let serviceChoice = [];
+let name = "";
+let description = "";
+let totalMembers = 0;
+
+const resetVariables = () => {
+  serviceChoice = [];
+  name = "";
+  description = "";
+  totalMembers = 0;
+};
+
+const AdminCommander = async (user, msg, client) => {
   try {
     const Menu = adminMenuData(user.data.pseudo, user.exist);
+    const listGroup = (await listGroups()).groups;
+
     if (!('participant' in msg.id)) {
       if (!Steps[msg.from]) {
         Steps[msg.from] = {};
@@ -14,18 +29,26 @@ const AdminCommander = async (user, msg,client) => {
         Steps[msg.from]["isSubMenu"] = true;
       }
       const currentMenu = Steps[msg.from]["currentMenu"];
+      if (msg.body === "#") {
+        Steps[msg.from]["currentMenu"] = "mainMenu";
+        Steps[msg.from]["isSubMenu"] = true;
+        resetVariables();
+        msg.reply(Menu);
+        return;
+      }
+
       switch (currentMenu) {
         case "mainMenu":
           switch (msg.body) {
             case "1":
-              msg.reply(`📋 Sélectionnez le service auquel vous souhaitez envoyer la campagne aux utilisateurs abonnés. :\n\n 1. Gestion sous Mandat, tapez 1.\n 2. Gestion Collective, tapez 2.\n 3. Conseil Financier, tapez 3. \n\n _Tapez # pour revenir au menu principal_`);
-              Steps[msg.from]["currentMenu"] = "menuCampaign";
+              let groupListMessage = "📋 Sélectionnez un ou plusieurs groupes auxquels vous souhaitez envoyer la campagne (par exemple, tapez 1 ou 1,2,5) :\n\n";
+              listGroup.forEach((group, index) => {
+                groupListMessage += `${index + 1}. ${group.name} (Nombre d'utilisateurs : ${group.memberCount}), tapez ${index + 1}.\n`;
+              });
+              groupListMessage += "\n\n _Tapez # pour revenir au menu principal_";
+              msg.reply(groupListMessage);
+              Steps[msg.from]["currentMenu"] = "selectGroup";
               Steps[msg.from]["isSubMenu"] = true;
-              break;
-            case "2":
-              msg.reply(`*n `);
-              Steps[msg.from]["currentMenu"] = "listAccountPeriodMenu";
-              Steps[msg.from]["isSubMenu"] = false;
               break;
             case "#":
               Steps[msg.from]["currentMenu"] = "mainMenu";
@@ -35,28 +58,71 @@ const AdminCommander = async (user, msg,client) => {
             default:
               Steps[msg.from]["currentMenu"] = "mainMenu";
               Steps[msg.from]["isSubMenu"] = true;
-              msg.reply(`Veuillez choisir un menu valide ci-dessus`);
+              msg.reply(`Veuillez choisir un menu valide ci-dessus\n\n _Tapez # pour revenir au menu principal_`);
               await sendMessageToNumber(client, user.data.phoneNumber, Menu);
-
           }
           break;
-          case "menuCampaign":
-            serviceChoice = msg.body == 1 ? "Gestion sous Mandat" :( msg.body == 2 ? "Gestion collective" : "Conseil financier")
-            msg.reply(`Veuillez lancer la campagne qui sera envoyée aux utilisateurs abonnés au service ${serviceChoice}. La campagne peut inclure un document (PDF ou image), une vidéo ou un texte. \n\n _Tapez # pour revenir au menu principal_`);
-            Steps[msg.from]["currentMenu"] = "sendCampaignMenu";
-          case "sendCampaignMenu":
-            msg.reply(`La campagne : ${msg.body} sera envoyé aux utilisateurs du service : ${serviceChoice}`)
-          case "listAccountPeriodMenu":
+        case "selectGroup":
+          const selectedGroupIndexes = msg.body.split(',').map(num => parseInt(num.trim()) - 1);
+          const validGroups = [];
+          const invalidGroups = [];
+
+          totalMembers = 0; // Reset totalMembers
+
+          selectedGroupIndexes.forEach(index => {
+            if (index >= 0 && index < listGroup.length) {
+              validGroups.push({ name: listGroup[index].name, _id: listGroup[index]._id });
+              totalMembers += listGroup[index].memberCount; // Ajouter le nombre de membres
+            } else {
+              invalidGroups.push(index + 1);
+            }
+          });
+
+          if (validGroups.length > 0) {
+            serviceChoice = validGroups;
+            let replyMessage = `Vous avez sélectionné les groupes : ${validGroups.map(group => group.name).join(', ')}\n`;
+            if (invalidGroups.length > 0) {
+              replyMessage += `\nLes numéros suivants ne sont pas valides : ${invalidGroups.join(', ')}\n`;
+            }
+            replyMessage += `\nVeuillez entrer le titre de la campagne.\n\n _Tapez # pour revenir au menu principal_`;
+            msg.reply(replyMessage);
+            Steps[msg.from]["currentMenu"] = "enterTitle";
+          } else {
+            msg.reply(`Numéros de groupes invalides : ${invalidGroups.join(', ')}. Veuillez entrer des numéros valides séparés par des virgules.\n\n _Tapez # pour revenir au menu principal_`);
+          }
+          break;
+        case "enterTitle":
+          name = msg.body;
+          msg.reply(`Titre enregistré : "${name}".\n\nVeuillez entrer la description de la campagne.\n\n _Tapez # pour revenir au menu principal_`);
+          Steps[msg.from]["currentMenu"] = "enterDescription";
+          break;
+        case "enterDescription":
+          description = msg.body;
+          msg.reply(`Description enregistrée : "${description}".\n\nConfirmez-vous l'envoi de la campagne aux groupes : ${serviceChoice.map(group => group.name).join(', ')} (Total des utilisateurs : ${totalMembers}) ? (Tapez OUI pour confirmer ou # pour annuler)\n\nTitre : ${name}\nDescription : ${description}\n\n _Tapez # pour revenir au menu principal_`);
+          Steps[msg.from]["currentMenu"] = "confirmCampaign";
+          break;
+        case "confirmCampaign":
+          if (msg.body.toLowerCase() === "oui") {
+            await createCampaign({ name, description, type: "Instantly", groups: serviceChoice.map(group => group._id) }, client);
+
+            msg.reply(`La campagne a été envoyée aux utilisateurs abonnés aux groupes : ${serviceChoice.map(group => group.name).join(', ')} (Total des utilisateurs : ${totalMembers}).\n\nTitre : ${name}\nDescription : ${description}\n\n _Tapez # pour revenir au menu principal_`);
+            resetVariables();
+          } else {
+            msg.reply(`Envoi de la campagne annulé.\n\n _Tapez # pour revenir au menu principal_`);
+            resetVariables();
+          }
+          Steps[msg.from]["currentMenu"] = "mainMenu";
+          Steps[msg.from]["isSubMenu"] = true;
           break;
         default:
           Steps[msg.from]["currentMenu"] = "mainMenu";
           Steps[msg.from]["isSubMenu"] = true;
-          msg.reply("Commande saisie incorrecte");
+          msg.reply("Commande saisie incorrecte\n\n _Tapez # pour revenir au menu principal_");
       }
     }
   } catch (error) {
     logger(client).error('Erreur rencontrée Admin', error);
-    msg.reply(`An internal server error occurred due to an action by administrator : ${user.data.pseudo}. Our team is working on it. \n\n Please type # to return to the main menu.`)
+    msg.reply(`An internal server error occurred due to an action by administrator : ${user.data.pseudo}. Our team is working on it. \n\n Please type # to return to the main menu.`);
   }
 };
 

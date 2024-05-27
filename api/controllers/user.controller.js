@@ -1,9 +1,9 @@
 const userService = require('../services/user.service');
 const ResponseService = require('../services/response.service');
 
-const getAllUser = async (req, res) => {
+const getAllUser = async (req, res,client) => {
   const role = req.query.role;
-  const response = await userService.list(role)
+  const response = await userService.list(role,client)
   if (response.success) {
     return ResponseService.success(res, { users: response.users,total:response.total });
   } else {
@@ -11,10 +11,10 @@ const getAllUser = async (req, res) => {
   }
 };
 
-const updateUser = async (req, res) => {
+const updateUser = async (req, res,client) => {
   const {...updatedData} = req.body;
   const phoneNumber = req.query.phoneNumber;
-  const response = await userService.update(phoneNumber, updatedData);
+  const response = await userService.update(phoneNumber, updatedData,client);
 
   if (response.success) {
     return ResponseService.success(res, { users: response.users });
@@ -23,9 +23,9 @@ const updateUser = async (req, res) => {
   }
 }
 
-const login = async (req, res) => {
+const login = async (req, res,client) => {
   const { phoneNumber, password } = req.body;
-  const response = await userService.login(phoneNumber, password);
+  const response = await userService.login(phoneNumber, password,client);
   if (response.success) {
     return ResponseService.success(res, { token: response.token , user:response.user });
   } else {

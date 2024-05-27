@@ -1,8 +1,8 @@
 const { PDFDocument } = require('pdf-lib');
-const { readFile, writeFile } = require('fs/promises');
+const { readFile } = require('fs/promises');
 const path = require('path');
 
-async function fillPdfFields(inputPath, data, outputPath) {
+async function fillPdfFields(inputPath, data) {
     try {
         const resolvedInputPath = path.resolve(__dirname, inputPath);
         const pdfDoc = await PDFDocument.load(await readFile(resolvedInputPath));

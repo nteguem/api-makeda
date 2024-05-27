@@ -5,7 +5,7 @@ const { sendMediaToNumber } = require("./whatsappMessaging");
 const { fillPdfFields } = require("../../services/fillFormPdf.service");
 const {list} = require("../../services/user.service")
 const { getRandomDelay } = require("../../helpers/utils")
-
+const logger = require("../logger")
 // Objet pour stocker l'étape actuelle et les réponses de l'utilisateur
 let userData ={};
 let countCase = 0;
@@ -247,7 +247,7 @@ const kycPersonCommander = async (user, msg, client, service) => {
                     const delay = getRandomDelay(5000, 15000);
                     await new Promise(resolve => setTimeout(resolve, delay));
                 } catch (error) {
-                    console.log(`Erreur lors de l'envoi ${admin.phoneNumber}`, error);
+                  logger(client).error(`Erreur lors de l'envoi ${admin.phoneNumber}`, error);
                 }
             }
             } else {
@@ -260,7 +260,7 @@ const kycPersonCommander = async (user, msg, client, service) => {
           }
           break;
         case 27:
-
+          userData[phoneNumber] = { step: 1, answers: {} };
         default:
           if(userData[phoneNumber].step == 27)
             {
@@ -283,8 +283,7 @@ const kycPersonCommander = async (user, msg, client, service) => {
   }
   
   } catch (error) {
-    // Gestion des erreurs      
-    console.log("error", error)
+    logger(client).error("error", error);
     msg.reply(`Une erreur interne du serveur s'est produite suite à une action de l'utilisateur : ${user.data.pseudo}. Notre équipe y travaille.\n\nVeuillez taper # pour soumettre le formulaire ou * pour revenir en arrière.`);
   }
 };

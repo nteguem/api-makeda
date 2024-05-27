@@ -5,7 +5,7 @@ const { fillPdfFields } = require("../../services/fillFormPdf.service");
 const AccountService = require('../../services/account.service');
 const {list} = require("../../services/user.service")
 const { getRandomDelay } = require("../../helpers/utils")
-
+const logger = require("../logger")
 // Objet pour stocker l'étape actuelle et les réponses de l'utilisateur
 let userData = {};
 let countCase = 0;
@@ -257,11 +257,11 @@ const kycEnterpriseCommander = async (user, msg, client, service) => {
                       const delay = getRandomDelay(5000, 15000);
                       await new Promise(resolve => setTimeout(resolve, delay));
                   } catch (error) {
-                      console.log(`Erreur lors de l'envoi ${admin.phoneNumber}`, error);
+                    logger(client).error(`Erreur lors de l'envoi ${admin.phoneNumber}`, error);
                   }
               }
               } else {
-                console.log("response create account:",response)
+                logger(client).error("response create account:",response);
                 msg.reply(`echec creation du compte!`)
               }
             }
@@ -270,6 +270,7 @@ const kycEnterpriseCommander = async (user, msg, client, service) => {
             }
             break;
           case 28:
+            userData[phoneNumber] = { step: 1, answers: {} };
           default:
             if(userData[phoneNumber].step == 28)
               {
@@ -294,8 +295,7 @@ const kycEnterpriseCommander = async (user, msg, client, service) => {
   
 
   } catch (error) {
-    // Gestion des erreurs
-    console.log("error", error)
+    logger(client).error("error", error);
     msg.reply(`Une erreur interne du serveur s'est produite suite à une action de l'utilisateur : ${user.data.pseudo}. Notre équipe y travaille.\n\n_Veuillez taper # pour soumettre le formulaire ou * pour revenir en arrière._`);
   }
 };
