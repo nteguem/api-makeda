@@ -292,9 +292,9 @@ const kycPersonCommander = async (user, msg, client, service) => {
 const getCurrentStepMessage = (step) => {
   switch (step) {
     case 1:
-      return "Veuillez saisir le nom  de la personne en charge de l'investissement.";
+      return "Veuillez saisir votre nom.";
     case 2:
-      return "Veuillez saisir le prénom  de la personne en charge de l'investissement.";
+      return "Veuillez saisir votre prénom.";
     case 3:
       return "📋 *Titre de civilité* : \n A-Monsieur ,\n B-Madame ,\n C-Autres ,\n"
     case 4:

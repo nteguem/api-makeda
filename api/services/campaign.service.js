@@ -1,10 +1,13 @@
 const Campaign = require('../models/campaign.model');
 const cron = require('node-cron');
-const {sendMessageToNumber} = require('../helpers/whatsApp/whatsappMessaging')
+const {sendMessageToNumber,sendMediaToNumber} = require('../helpers/whatsApp/whatsappMessaging')
 const {list} = require('./user.service')
 const { getRandomDelay } = require("../helpers/utils")
 const {getUsersInGroup} = require("./group.service")
 const logger = require("../helpers/logger")
+const fs = require('fs');
+const path = require('path');
+const fetch = require('node-fetch');
 
 let tasks = {};
 async function createCampaign(campaignData, client) {
@@ -90,9 +93,33 @@ async function sendCampaignWhatapp(client, campaign) {
         const usersInGroup = await getUsersInGroup(group._id);
         for (const targetUser of usersInGroup.users) {
             try {
-                const content = `Salut ${targetUser.pseudo},\n\n${campaign.name} \n\n*${campaign.description}* \n\n Votre avenir financier, notre expertise personnalisée 🤝`;
-                await sendMessageToNumber(client,targetUser.phoneNumber, content);
-                // successfulTargets.push(targetUser);
+              if(campaign.description?.hasMedia)
+                {
+                  fetch(campaign.description?.content)
+                  .then(res => {
+                      const dest = fs.createWriteStream('tempfile');
+                      res.body.pipe(dest);
+                      dest.on('finish', () => {
+                          fs.readFile('tempfile', 'base64', (err, data) => {
+                              if (err) {
+                                  console.log('Erreur lors de la lecture du fichier:', err);
+                                  return;
+                              }
+                              sendMediaToNumber(client,targetUser.phoneNumber,res.headers.get('content-type'), data,`${campaign?.name}`, `${campaign?.name}`)
+                              fs.unlinkSync('tempfile');
+                          });
+                      });
+                  })
+                  .catch(err => {
+                      console.log('Erreur lors du téléchargement du fichier:', err);
+                  });
+                }
+                else
+                {
+                  const content = `Salut ${targetUser.pseudo},\n\n${campaign.name} \n\n*${campaign.description?.content}* \n\n Votre avenir financier, notre expertise personnalisée 🤝`;
+                  await sendMessageToNumber(client,targetUser.phoneNumber, content);
+                }
+                // successfulTargets.push(targetUser); 
                 const delay = getRandomDelay(5000, 15000);
                 await new Promise(resolve => setTimeout(resolve, delay));
             } catch (error) {

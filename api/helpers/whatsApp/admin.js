@@ -1,8 +1,9 @@
 const { adminMenuData } = require("../../data");
 const logger = require('../logger');
-const { sendMessageToNumber } = require('./whatsappMessaging');
+const { sendMessageToNumber,sendMediaToNumber } = require('./whatsappMessaging');
 const { listGroups } = require("../../services/group.service");
 const { createCampaign } = require("../../services/campaign.service");
+const { uploadToCloudinary } = require("../../services/uploadFile.service");
 
 let Steps = {};
 let serviceChoice = [];
@@ -92,20 +93,38 @@ const AdminCommander = async (user, msg, client) => {
           }
           break;
         case "enterTitle":
-          name = msg.body;
-          msg.reply(`Titre enregistré : "${name}".\n\nVeuillez entrer la description de la campagne.\n\n _Tapez # pour revenir au menu principal_`);
-          Steps[msg.from]["currentMenu"] = "enterDescription";
+          if (msg.hasMedia && (msg.type === "image" || msg.type === "document")) 
+            {
+              msg.reply(`Veuillez saisir un texte , fichier non autorisé.\n\n _Tapez # pour revenir au menu principal_`);
+            }
+            else
+            {
+              name = msg.body;
+              msg.reply(`Titre enregistré : "${name}".\n\nVeuillez entrer la description de la campagne (_saisir un texte ou joindre un document_).\n\n _Tapez # pour revenir au menu principal_`);
+              Steps[msg.from]["currentMenu"] = "enterDescription";
+            }
           break;
         case "enterDescription":
-          description = msg.body;
-          msg.reply(`Description enregistrée : "${description}".\n\nConfirmez-vous l'envoi de la campagne aux groupes : ${serviceChoice.map(group => group.name).join(', ')} (Total des utilisateurs : ${totalMembers}) ? (Tapez OUI pour confirmer ou # pour annuler)\n\nTitre : ${name}\nDescription : ${description}\n\n _Tapez # pour revenir au menu principal_`);
-          Steps[msg.from]["currentMenu"] = "confirmCampaign";
+          if (msg.hasMedia && (msg.type === "image" || msg.type === "document")) {
+            const media = await msg.downloadMedia();
+            const nameMedia = `${user.data.phoneNumber}_${name}`
+            const bufferData = await Buffer.from(media.data, 'base64');
+            const responseClodinary = await uploadToCloudinary(`${nameMedia}`, git )
+            description = {hasMedia:true,content:responseClodinary} ;
+            await sendMediaToNumber(client,user.data.phoneNumber, media.mimetype, bufferData.toString("base64"),nameMedia, `Description enregistrée.\n\nConfirmez-vous l'envoi de la campagne aux groupes : ${serviceChoice.map(group => group.name).join(', ')} (Total des utilisateurs : ${totalMembers}) ? (Tapez OUI pour confirmer ou # pour annuler)\n\nTitre : ${name}\n\n _Tapez # pour revenir au menu principal_`)
+            Steps[msg.from]["currentMenu"] = "confirmCampaign"; 
+          }
+          else {
+            description = {hasMedia:false,content:msg.body};
+            msg.reply(`Description enregistrée : "${description}".\n\nConfirmez-vous l'envoi de la campagne aux groupes : ${serviceChoice.map(group => group.name).join(', ')} (Total des utilisateurs : ${totalMembers}) ? (Tapez OUI pour confirmer ou # pour annuler)\n\nTitre : ${name}\nDescription : ${description}\n\n _Tapez # pour revenir au menu principal_`);
+            Steps[msg.from]["currentMenu"] = "confirmCampaign"; 
+              }
           break;
         case "confirmCampaign":
           if (msg.body.toLowerCase() === "oui") {
             await createCampaign({ name, description, type: "Instantly", groups: serviceChoice.map(group => group._id) }, client);
 
-            msg.reply(`La campagne a été envoyée aux utilisateurs abonnés aux groupes : ${serviceChoice.map(group => group.name).join(', ')} (Total des utilisateurs : ${totalMembers}).\n\nTitre : ${name}\nDescription : ${description}\n\n _Tapez # pour revenir au menu principal_`);
+            msg.reply(`La campagne a été envoyée aux utilisateurs abonnés aux groupes : ${serviceChoice.map(group => group.name).join(', ')} (Total des utilisateurs : ${totalMembers}).\n\nTitre : ${name}\n\n _Tapez # pour revenir au menu principal_`);
             resetVariables();
           } else {
             msg.reply(`Envoi de la campagne annulé.\n\n _Tapez # pour revenir au menu principal_`);

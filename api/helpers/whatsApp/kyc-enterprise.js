@@ -304,7 +304,7 @@ const kycEnterpriseCommander = async (user, msg, client, service) => {
 const getCurrentStepMessage = (step) => {
   switch (step) {
     case 1:
-      return "Veuillez saisir la Dénomination sociale en charge de l'investissement.";
+      return "Veuillez saisir votre Dénomination sociale.";
     case 2:
       return "Veuillez joindre une copie des statuts. \n\n NB: _joindre une image ou un document pdf_";
     case 3:

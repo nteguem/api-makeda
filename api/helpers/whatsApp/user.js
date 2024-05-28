@@ -4,7 +4,7 @@ const { sendMessageToNumber } = require('./whatsappMessaging');
 const { kycPersonCommander } = require('./kyc-person');
 const { kycEnterpriseCommander } = require('./kyc-enterprise');
 const { listAccounts } = require("../../services/account.service");
-
+const { GainSimulationCommander } = require("./simulator")
 let Steps = {};
 
 const UserCommander = async (user, msg, client) => {
@@ -42,8 +42,8 @@ const UserCommander = async (user, msg, client) => {
               Steps[msg.from]["currentMenu"] = "referralMenu";
               break;
             case "5":
-              msg.reply("*Simulateur de Gains pour MAKEDA Asset Management* \n\n Découvrez le potentiel de vos investissements avec le Makeda Investment Simulator. Cet outil interactif vous permet de simuler divers scénarios de placement et d'évaluer les gains possibles. Basé sur des données fiables, il est conçu pour vous aider à visualiser et planifier vos objectifs financiers de manière efficace et simple.\n\n Accédez au simulateur ici : \nhttps://public.tableau.com/app/profile/warot.bertrand/viz/shared/RDSYBH8K8");
               Steps[msg.from]["isSubMenu"] = true;
+              msg.reply(`📋 *Veuillez saisir votre méthode de versement*.\n\n 1-Versement périodique,Tapez 1\n 2-Versement unique,Tapez 2\n\n _Tapez # pour revenir au menu principal_`);
               Steps[msg.from]["currentMenu"] = "simulateGainMenu";
               break;
             case "6":
@@ -58,7 +58,7 @@ const UserCommander = async (user, msg, client) => {
                 count++;
               });
               const content = listAccount.length == 0 ? `Vous n'avez pas encore souscrit à un service. Pour le faire, tapez 3 dans le menu principal.` : result;
-                msg.reply(`${content} \n\n_Tapez # pour revenir au menu principal_`);
+              msg.reply(`${content} \n\n_Tapez # pour revenir au menu principal_`);
               Steps[msg.from]["isSubMenu"] = false;
               Steps[msg.from]["currentMenu"] = "myAccountMenu";
               break;
@@ -118,11 +118,11 @@ const UserCommander = async (user, msg, client) => {
           switch (msg.body) {
             case "1":
               (Steps[msg.from]["currentMenu"] = "personMenu");
-              await sendMessageToNumber(client, user.data.phoneNumber, `é𝗍𝖺𝗉𝖾 1/27\n\nVeuillez saisir le nom  de la personne en charge de l'investissement.\n\n_𝖳𝖺𝗉𝖾𝗓 # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._`);
+              await sendMessageToNumber(client, user.data.phoneNumber, `é𝗍𝖺𝗉𝖾 1/27\n\nVeuillez saisir votre nom.\n\n_𝖳𝖺𝗉𝖾𝗓 # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._`);
               break;
             case "2":
               (Steps[msg.from]["currentMenu"] = "enterpriseMenu");
-              await sendMessageToNumber(client, user.data.phoneNumber, `é𝗍𝖺𝗉𝖾 1/28\n\nVeuillez saisir la Dénomination sociale en charge de l'investissement.\n\n_𝖳𝖺𝗉𝖾𝗓 # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._`);
+              await sendMessageToNumber(client, user.data.phoneNumber, `é𝗍𝖺𝗉𝖾 1/28\n\nVeuillez saisir votre Dénomination sociale.\n\n_𝖳𝖺𝗉𝖾𝗓 # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._`);
               break;
           }
           break;
@@ -143,6 +143,15 @@ const UserCommander = async (user, msg, client) => {
             await sendMessageToNumber(client, user.data.phoneNumber, Menu);
           } else {
             await kycEnterpriseCommander(user, msg, client, Steps[msg.from]["addAccount"]["service"]);
+          }
+          break;
+        case "simulateGainMenu":
+          if (msg.body == "#") {
+            Steps[msg.from]["currentMenu"] = "mainMenu";
+            Steps[msg.from]["isSubMenu"] = true;
+            await sendMessageToNumber(client, user.data.phoneNumber, Menu);
+          } else {
+            await GainSimulationCommander(user, msg, client);
           }
           break;
         default:
