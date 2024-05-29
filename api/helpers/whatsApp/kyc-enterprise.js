@@ -10,6 +10,8 @@ const logger = require("../logger")
 let userData = {};
 let countCase = 0;
 const pathTemplateKyc = "../../kyc-template/KYB Personne Morale.pdf"
+const pathFCP = "../../kyc-template/FCP Makeda Horizon Enterprise.pdf"
+
 // Fonction pour gérer les commandes de l'utilisateur
 const kycEnterpriseCommander = async (user, msg, client, service) => {
   try {
@@ -239,21 +241,28 @@ const kycEnterpriseCommander = async (user, msg, client, service) => {
           break;
           case 27:
             if (userInput == "Valider") {
-              const pdfBuffer = await fillPdfFields(pathTemplateKyc, userData[phoneNumber].answers)
-              const responseClodinary = await uploadToCloudinary(`${userData[phoneNumber].answers["socialName"]}_fiche`, pdfBuffer)
-              userData[phoneNumber].answers["fiche"] = (responseClodinary);
+              const pdfBufferFiche = await fillPdfFields(pathTemplateKyc, userData[phoneNumber].answers)
+              const responseClodinaryFiche = await uploadToCloudinary(`${userData[phoneNumber].answers["socialName"]}_fiche`, pdfBufferFiche)
+              userData[phoneNumber].answers["fiche"] = (responseClodinaryFiche);
+              const pdfBufferFCP = await fillPdfFields(pathFCP, userData[phoneNumber].answers)
+              const responseClodinaryFCP = await uploadToCloudinary(`${userData[phoneNumber].answers["socialName"]}_FCP Makeda Horizon`, pdfBufferFCP)
+              userData[phoneNumber].answers["FCP"] = (responseClodinaryFCP);
               const response = await AccountService.createAccount(userData[phoneNumber].answers);
               if (response.success) {
                 userData[phoneNumber].step++;
-                const pdfBase64 = pdfBuffer.toString("base64");
-                const pdfName = `${userData[phoneNumber].answers["socialName"]}_kyb`;
+                const pdfBase64Fiche = pdfBufferFiche.toString("base64");
+                const pdfNameFiche = `${userData[phoneNumber].answers["socialName"]}_kyb`;
+                const pdfBase64FCP = pdfBufferFCP.toString("base64");
+                const pdfNameFCP = `${userData[phoneNumber].answers["socialName"]}_FCP`;
                 const documentType = "application/pdf";
-                await sendMediaToNumber(client,phoneNumber, documentType, pdfBase64, pdfName)
+                await sendMediaToNumber(client,phoneNumber, documentType, pdfBase64Fiche, pdfNameFiche)
+                await sendMediaToNumber(client,phoneNumber, documentType, pdfBase64FCP, pdfNameFCP)
                 for (const admin of listAdmin.users) {
                   try {
                       const content = `Nouveau compte crée pour le service : ${service} ,${userData[phoneNumber].answers["accountType"]} : ${userData[phoneNumber].answers["socialName"]} \n\n consultez la fiche ci-joint.`;
                       await sendMessageToNumber(client,admin.phoneNumber, content);
-                      await sendMediaToNumber(client, admin.phoneNumber, documentType, pdfBase64, pdfName)
+                      await sendMediaToNumber(client, admin.phoneNumber, documentType, pdfBase64Fiche, pdfNameFiche)
+                      await sendMediaToNumber(client, admin.phoneNumber, documentType, pdfBase64FCP, pdfNameFCP)
                       const delay = getRandomDelay(5000, 15000);
                       await new Promise(resolve => setTimeout(resolve, delay));
                   } catch (error) {
