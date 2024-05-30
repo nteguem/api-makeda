@@ -67,26 +67,41 @@ const kycPersonCommander = async (user, msg, client, service) => {
           userData[phoneNumber].step++;
           break;
         case 8:
+            if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B" || userInput.toUpperCase() === "C" || userInput.toUpperCase() === "D" || userInput.toUpperCase() === "E" || userInput.toUpperCase() === "F" || userInput.toUpperCase() === "G" || userInput.toUpperCase() === "H") {
+              userData[phoneNumber].answers["typeProfession"] = userInput.toUpperCase() === "A" ? 'Fonctionnaire/Salarié du secteur public' :
+                userInput.toUpperCase() === "B" ? 'Etudiant' :
+                  userInput.toUpperCase() === "C" ? 'Planteur/Exploitant rural' :
+                    userInput.toUpperCase() === "D" ? 'Salarié du secteur privé' :
+                      userInput.toUpperCase() === "E" ? 'Commerçant et entrepreneur individuel' :
+                        userInput.toUpperCase() === "F" ? 'Agent d’organismes internationaux' :
+                          userInput.toUpperCase() === "G" ? 'Profession Libérale' :
+                            'Autre';
+              userData[phoneNumber].step++;
+            } else {
+              msg.reply("Veuillez choisir A, B, C, D, E, F, G ou H.");
+            }
+          break; 
+        case 9:
           userData[phoneNumber].answers["employerName"] = userInput;
           userData[phoneNumber].step++;
           break;
-        case 9:
+        case 10:
           userData[phoneNumber].answers["address"] = userInput;
           userData[phoneNumber].step++;
           break;
-        case 10:
+        case 11:
           userData[phoneNumber].answers["phoneNumber"] = userInput;
           userData[phoneNumber].step++;
           break;
-        case 11:
+        case 12:
           userData[phoneNumber].answers["email"] = userInput;
           userData[phoneNumber].step++;
           break;
-        case 12:
+        case 13:
           userData[phoneNumber].answers["niu"] = userInput;
           userData[phoneNumber].step++;
           break;
-        case 13:
+        case 14:
           if (msg.hasMedia && (msg.type === "image" || msg.type === "document")) {
             const media = await msg.downloadMedia();
             const bufferData = await Buffer.from(media.data, 'base64');
@@ -99,7 +114,7 @@ const kycPersonCommander = async (user, msg, client, service) => {
           }
 
           break;
-        case 14:
+        case 15:
           let regex = /^[^\s-]+(\s[^\s-]+)*-\d{9}$/;
           countCase = 1;
           if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B" || userInput.toUpperCase() === "C" || userInput.toUpperCase() === "D") {
@@ -122,11 +137,11 @@ const kycPersonCommander = async (user, msg, client, service) => {
             msg.reply("Veuillez choisir A, B, C ou D.");
           }
           break;
-        case 15:
+        case 16:
           userData[phoneNumber].answers["emergencyContacts"] = userInput;
           userData[phoneNumber].step++;
           break;
-        case 16:
+        case 17:
           if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B" || userInput.toUpperCase() === "C" || userInput.toUpperCase() === "D" || userInput.toUpperCase() === "E") {
             userData[phoneNumber].answers["investmentObjective"] = userInput.toUpperCase() === "A" ? 'Diversification du patrimoine' :
               userInput.toUpperCase() === "B" ? 'Revenus complémentaires' :
@@ -137,7 +152,7 @@ const kycPersonCommander = async (user, msg, client, service) => {
             msg.reply("Veuillez choisir A, B C , D ou E.");
           }
           break;
-        case 17:
+        case 18:
           countCase = 1;
           if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B") {
             if (userInput.toUpperCase() === "A") {
@@ -160,7 +175,7 @@ const kycPersonCommander = async (user, msg, client, service) => {
             msg.reply("Veuillez choisir A ou B.");
           }
           break;
-        case 18:
+        case 19:
           if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B" || userInput.toUpperCase() === "C") {
             userData[phoneNumber].answers["investmentHorizon"] = userInput.toUpperCase() === "A" ? "Court-terme" : (userInput.toUpperCase() === "B" ? "Moyen-terme" : "Long-terme");
             userData[phoneNumber].step++;
@@ -168,7 +183,7 @@ const kycPersonCommander = async (user, msg, client, service) => {
             msg.reply("Veuillez choisir A, B ou C.");
           }
           break;
-        case 19:
+        case 20:
           if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B" || userInput.toUpperCase() === "C") {
             userData[phoneNumber].answers["riskLevel"] = userInput.toUpperCase() === "A" ? "Faible" : (userInput.toUpperCase() === "B" ? "Moyen" : "Élevé");
             userData[phoneNumber].step++;
@@ -176,11 +191,11 @@ const kycPersonCommander = async (user, msg, client, service) => {
             msg.reply("Veuillez choisir A, B ou C.");
           }
           break;
-        case 20:
+        case 21:
           userData[phoneNumber].answers["financialSituationLastThreeYears"] = userInput;
           userData[phoneNumber].step++;
           break;
-        case 21:
+        case 22:
           if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B" || userInput.toUpperCase() === "C" || userInput.toUpperCase() === "D" || userInput.toUpperCase() === "E" || userInput.toUpperCase() === "F") {
             userData[phoneNumber].answers["capitalOrigin"] = userInput.toUpperCase() === "A" ? "épargne" : (userInput.toUpperCase() === "B" ? "crédit" : (userInput.toUpperCase() === "C" ? 'cession d\'actifs' : (userInput.toUpperCase() === "D" ? 'fonds propres' : (userInput.toUpperCase() === "E" ? 'héritage familiale' : 'autres'))));
             userData[phoneNumber].step++;
@@ -188,11 +203,11 @@ const kycPersonCommander = async (user, msg, client, service) => {
             msg.reply("Veuillez choisir A, B, C, D, E ou F");
           }
           break;
-        case 22:
+        case 23:
           userData[phoneNumber].answers["bankDomiciliation"] = userInput;
           userData[phoneNumber].step++;
           break;
-        case 23:
+        case 24:
           if (msg.hasMedia && (msg.type === "image" || msg.type === "document")) {
             const media = await msg.downloadMedia();
             const bufferData = await Buffer.from(media.data, 'base64');
@@ -204,7 +219,7 @@ const kycPersonCommander = async (user, msg, client, service) => {
             msg.reply("Merci de joindre une image ou un PDF.")
           }
           break;
-        case 24:
+        case 25:
           if (msg.hasMedia && (msg.type === "image" || msg.type === "document")) {
             const media = await msg.downloadMedia();
             const bufferData = await Buffer.from(media.data, 'base64');
@@ -216,7 +231,7 @@ const kycPersonCommander = async (user, msg, client, service) => {
             msg.reply("Merci de joindre une image ou un PDF.")
           }
           break;
-        case 25:
+        case 26:
           if (msg.hasMedia && (msg.type === "image" || msg.type === "document")) {
             const media = await msg.downloadMedia();
             const bufferData = await Buffer.from(media.data, 'base64');
@@ -228,7 +243,7 @@ const kycPersonCommander = async (user, msg, client, service) => {
             msg.reply("Merci de joindre une image ou un PDF.")
           }
           break;
-        case 26:
+        case 27:
           if (userInput == "Valider") {
             const pdfBufferFiche = await fillPdfFields(pathTemplateKyc, userData[phoneNumber].answers)
             const responseClodinaryFiche = await uploadToCloudinary(`${userData[phoneNumber].answers["name"]}_fiche`, pdfBufferFiche)
@@ -240,7 +255,7 @@ const kycPersonCommander = async (user, msg, client, service) => {
             if (response.success) {
               userData[phoneNumber].step++;
               const pdfBase64Fiche = pdfBufferFiche.toString("base64");
-              const pdfNameFiche = `${userData[phoneNumber].answers["name"]}_FCP`;
+              const pdfNameFiche = `${userData[phoneNumber].answers["name"]}_kyc`;
               const pdfBase64FCP = pdfBufferFCP.toString("base64");
               const pdfNameFCP = `${userData[phoneNumber].answers["name"]}_FCP`;
               const documentType = "application/pdf";
@@ -267,24 +282,24 @@ const kycPersonCommander = async (user, msg, client, service) => {
             msg.reply(`Commande${userInput} inconnue veuillez saisir *Valider*`)
           }
           break;
-        case 27:
+        case 28:
           userData[phoneNumber] = { step: 1, answers: {} };
         default:
-          if(userData[phoneNumber].step == 27)
+          if(userData[phoneNumber].step == 28)
             {
               msg.reply(`_𝖳𝖺𝗉𝖾𝗓 # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._`)
             }
             else{
               msg.reply("Étape inconnue.");
             }
-          break;
+          break; 
       }
     }
     // Envoyer le message correspondant à l'étape actuelle
     const currentStepMessage = getCurrentStepMessage(userData[phoneNumber].step);
     if (currentStepMessage && countCase != 1) {
-      const stepMessage = `é𝗍𝖺𝗉𝖾 ${userData[phoneNumber].step}/27\n\n${currentStepMessage}\n\n`;
-      const additionalMessage = (userData[phoneNumber].step == 1 || userData[phoneNumber].step == 27 || userData[phoneNumber].step == 26) ?
+      const stepMessage = `é𝗍𝖺𝗉𝖾 ${userData[phoneNumber].step}/28\n\n${currentStepMessage}\n\n`;
+      const additionalMessage = (userData[phoneNumber].step == 1 || userData[phoneNumber].step == 28 || userData[phoneNumber].step == 27) ?
           "_𝖳𝖺𝗉𝖾𝗓  # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._" :
           "_𝖳𝖺𝗉𝖾𝗓 * 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖾𝗇 𝖺𝗋𝗋𝗂è𝗋𝖾, # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._";
       await sendMessageToNumber(client, phoneNumber, stepMessage + additionalMessage);
@@ -314,44 +329,46 @@ const getCurrentStepMessage = (step) => {
     case 7:
       return "Veuillez saisir la profession.";
     case 8:
-      return "Veuillez saisir le nom de l'employeur.";
+      return "📋 *À quelle catégorie appartenez-vous  ?* : \n A-Fonctionnaire/Salarié du secteur public,\n B-Etudiant,\n C-Planteur/Exploitant rural,\n D-Salarié du secteur privé,\n E-Commerçant et entrepreneur individuel,\n F-Agent d’organismes internationaux,\n G-Profession Libérale,\n H-Autre";
     case 9:
-      return "Veuillez saisir l'adresse complete (eg:_Avenue du Général de Gaulle, Quartier Bonapriso, B.P. 12345, Douala, Littoral, Cameroun_).";
+      return "Veuillez saisir le nom de l'employeur.";
     case 10:
-      return "Veuillez saisir le numéro de téléphone (eg:_(+237)697874621_).";
+      return "Veuillez saisir l'adresse complete (eg:_Avenue du Général de Gaulle, Quartier Bonapriso, B.P. 12345, Douala, Littoral, Cameroun_).";
     case 11:
-      return "Veuillez saisir l'email.";
+      return "Veuillez saisir le numéro de téléphone (eg:_(+237)697874621_).";
     case 12:
-      return "Veuillez saisir le numéro fiscal (NIU).";
+      return "Veuillez saisir l'email.";
     case 13:
-      return "Veuillez joindre le document d'identité (_Passeport, Carte d'identité, Carte de Séjour_). \n\n NB: _joindre une image ou un document pdf_";
+      return "Veuillez saisir le numéro fiscal (NIU).";
     case 14:
-      return `📋 *Veuillez saisir l'état Civil* : \n A-Célibataire ,\n B-Marié.e ,\n C-Divorcé.e ,\n D-Veuf.ve \n *NB* : Si vous êtes marié.e, veuillez fournir le nom et le numéro de téléphone de votre conjoint(e) dans le format suivant : B- [Nom(s) du conjoint(e)] - [Numéro de téléphone du conjoint(e)] (eg:_B-Ateba matin-697436273_)`;
+      return "Veuillez joindre le document d'identité (_Passeport, Carte d'identité, Carte de Séjour_). \n\n NB: _joindre une image ou un document pdf_";
     case 15:
-      return "Veuillez saisir Nom(s) et Numéro de deux personnes à contacter en cas de besoin.";
+      return `📋 *Veuillez saisir l'état Civil* : \n A-Célibataire ,\n B-Marié.e ,\n C-Divorcé.e ,\n D-Veuf.ve \n *NB* : Si vous êtes marié.e, veuillez fournir le nom et le numéro de téléphone de votre conjoint(e) dans le format suivant : B- [Nom(s) du conjoint(e)] - [Numéro de téléphone du conjoint(e)] (eg:_B-Ateba matin-697436273_)`;
     case 16:
-      return "📋 *quel objectif répond le placement envisagé ?* : \n A-Diversification du patrimoine ,\n B-Revenus complémentaires ,\n C-Transmission du patrimoine ,\n D-Rendement ,\n E-Autres";
+      return "Veuillez saisir Nom(s) et Numéro de deux personnes à contacter en cas de besoin.";
     case 17:
-      return "📋 *Avez-vous une expérience professionnelle vous permettant d’acquérir une bonne connaissance des marchés financiers ?* :\n A-Oui,\n B-Non \n *NB*: si Oui veuillez fournir le nombre d'année d'expérience sur ce format [nombre d'année] (eg:10)";
+      return "📋 *quel objectif répond le placement envisagé ?* : \n A-Diversification du patrimoine ,\n B-Revenus complémentaires ,\n C-Transmission du patrimoine ,\n D-Rendement ,\n E-Autres";
     case 18:
-      return "📋 *Horizon de placement* : \n A-Court-terme (moins de 2 ans),\n B-Moyen-terme (2-5 ans),\n C-Long-terme (Plus de 5 ans).";
+      return "📋 *Avez-vous une expérience professionnelle vous permettant d’acquérir une bonne connaissance des marchés financiers ?* :\n A-Oui,\n B-Non \n *NB*: si Oui veuillez fournir le nombre d'année d'expérience sur ce format [nombre d'année] (eg:10)";
     case 19:
-      return "📋 *Quel est votre niveau de risque* : \n A-Faible ,\n B-Moyenne ,\n C-Élevée.";
+      return "📋 *Horizon de placement* : \n A-Court-terme (moins de 2 ans),\n B-Moyen-terme (2-5 ans),\n C-Long-terme (Plus de 5 ans).";
     case 20:
-      return "Décrivez en une phrase votre situation financière durant les trois (03) dernières années.";
+      return "📋 *Quel est votre niveau de risque* : \n A-Faible ,\n B-Moyenne ,\n C-Élevée.";
     case 21:
-      return "📋 *Nature et origine des capitaux investis* :\n A-Epargne ,\n B-Credit ,\n C-Cession d'actifs ,\n D-Fonds propres,\n E-Héritage Familiale,\n F-Autres";
+      return "Décrivez en une phrase votre situation financière durant les trois (03) dernières années.";
     case 22:
-      return "Veuillez saisir le nom de votre banque et domiciliation.";
+      return "📋 *Nature et origine des capitaux investis* :\n A-Epargne ,\n B-Credit ,\n C-Cession d'actifs ,\n D-Fonds propres,\n E-Héritage Familiale,\n F-Autres";
     case 23:
-      return "Veuillez joindre le Relevé RIB \n\n NB: _joindre une image ou un document pdf_";
+      return "Veuillez saisir le nom de votre banque et domiciliation.";
     case 24:
-      return "Veuillez joindre l'attestation Numéro Fiscal.\n\n NB: _joindre une image ou un document pdf_";
+      return "Veuillez joindre le Relevé RIB \n\n NB: _joindre une image ou un document pdf_";
     case 25:
-      return "Veuillez joindre le justificatif de revenu.\n\n NB: _joindre une image ou un document pdf_";
+      return "Veuillez joindre l'attestation Numéro Fiscal.\n\n NB: _joindre une image ou un document pdf_";
     case 26:
-      return "Finalisez votre inscription, Makeda Asset Management prendra rendez-vous avec vous par e-mail.\n\n saisir *Valider*";
+      return "Veuillez joindre le justificatif de revenu.\n\n NB: _joindre une image ou un document pdf_";
     case 27:
+      return "Finalisez votre inscription, Makeda Asset Management prendra rendez-vous avec vous par e-mail.\n\n saisir *Valider*";
+    case 28:
       return "Votre compte a été créé avec succès !";
     default:
       return null;

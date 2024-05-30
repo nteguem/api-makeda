@@ -114,6 +114,9 @@ const accountSchema = new Schema({
   profession: {
     type: String,
   },
+  typeProfession: {
+    type: String,
+  },
   employerName: {
     type: String,
   },

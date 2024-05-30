@@ -19,7 +19,15 @@ async function createAccount(accountData,client) {
             accountData.service === "Gestion sous Mandat" ? DefaultGroupNames.GROUPE_GESTION_SOUS_MANDAT :
             DefaultGroupNames.GROUPE_GESTION_COLLECTIVE,
             accountData.accountType === "personne_morale" ? DefaultGroupNames.GROUPE_PERSONNE_MORALE :
-            DefaultGroupNames.GROUPE_PERSONNE_PHYSIQUE
+            DefaultGroupNames.GROUPE_PERSONNE_PHYSIQUE,
+            accountData.typeProfession === 'Fonctionnaire/Salarié du secteur public' ? DefaultGroupNames.GROUPE_FONCTIONNAIRE :
+            accountData.typeProfession === 'Etudiant' ? DefaultGroupNames.GROUPE_ETUDIANT :
+            accountData.typeProfession === 'Planteur/Exploitant rural' ? DefaultGroupNames.GROUPE_PLANTEUR :
+            accountData.typeProfession === 'Salarié du secteur privé' ? DefaultGroupNames.GROUPE_SALARIE_PRIVE :
+            accountData.typeProfession === 'Commerçant et entrepreneur individuel' ? DefaultGroupNames.GROUPE_COMMERCANT :
+            accountData.typeProfession === 'Agent d’organismes internationaux' ? DefaultGroupNames.GROUPE_AGENT_INTERNATIONAL :
+            accountData.typeProfession === 'Profession Libérale' ? DefaultGroupNames.GROUPE_PROFESSION_LIBERALE :
+            DefaultGroupNames.GROUPE_AUTRE
         ];
 
         for (const group of groups) {

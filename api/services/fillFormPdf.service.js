@@ -40,6 +40,32 @@ async function fillPdfFields(inputPath, data) {
         } else {
             console.log(`Invalid civility value: ${civility}`);
         }
+
+        // Gérer les boutons radio pour la catégorie de profession
+        const category = data.typeProfession;
+        const categoryOptions = [
+            'Fonctionnaire/Salarié du secteur public',
+            'Etudiant',
+            'Planteur/Exploitant rural',
+            'Salarié du secteur privé',
+            'Commerçant et entrepreneur individuel',
+            'Agent d’organismes internationaux',
+            'Profession Libérale',
+            'Autre'
+        ];
+
+        if (categoryOptions.includes(category)) {
+            const radioField = form.getFieldMaybe(category);
+            if (radioField && radioField.constructor.name === 'PDFCheckBox') {
+                radioField.check();
+            } else {
+                console.log(`Le bouton radio pour "${category}" n'existe pas ou n'est pas une case à cocher.`);
+            }
+        } else {
+            console.log(`Valeur de catégorie invalide : ${category}`);
+        }
+
+
         // Gérer les boutons radio pour le status matrimoniale
         const maritalStatus = data.maritalStatus;
         const maritalStatusOptions = ['Célibataire', 'Marié.e', 'Divorcé.e', 'Veuf.ve'];
@@ -56,7 +82,7 @@ async function fillPdfFields(inputPath, data) {
 
         // Gérer les boutons radio pour l'objectif répond le placement envisagé
         const investmentObjective = data.investmentObjective;
-        const investmentObjectiveOptions = ['Diversification du patrimoine', 'Revenus complémentaires', 'Transmission du patrimoine','Diversification de placement','Placement de trésorerie', 'Rendement', "Autres"];
+        const investmentObjectiveOptions = ['Diversification du patrimoine', 'Revenus complémentaires', 'Transmission du patrimoine', 'Diversification de placement', 'Placement de trésorerie', 'Rendement', "Autres"];
         if (investmentObjectiveOptions.includes(investmentObjective)) {
             const radioField = form.getFieldMaybe(investmentObjective);
             if (radioField && radioField.constructor.name === 'PDFCheckBox') {
@@ -116,10 +142,10 @@ async function fillPdfFields(inputPath, data) {
         form.getFields().forEach(field => {
             if (field.enableReadOnly) {
                 field.enableReadOnly();
-            } 
+            }
         });
         const pdfBytes = await pdfDoc.save();
-        return Buffer.from(pdfBytes, 'base64'); 
+        return Buffer.from(pdfBytes, 'base64');
     } catch (err) {
         console.log('An error occurred:', err);
     }
