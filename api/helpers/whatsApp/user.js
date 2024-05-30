@@ -118,7 +118,7 @@ const UserCommander = async (user, msg, client) => {
           switch (msg.body) {
             case "1":
               (Steps[msg.from]["currentMenu"] = "personMenu");
-              await sendMessageToNumber(client, user.data.phoneNumber, `é𝗍𝖺𝗉𝖾 1/27\n\nVeuillez saisir votre nom.\n\n_𝖳𝖺𝗉𝖾𝗓 # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._`);
+              await sendMessageToNumber(client, user.data.phoneNumber, `é𝗍𝖺𝗉𝖾 1/29\n\nVeuillez saisir votre nom.\n\n_𝖳𝖺𝗉𝖾𝗓 # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._`);
               break;
             case "2":
               (Steps[msg.from]["currentMenu"] = "enterpriseMenu");

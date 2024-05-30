@@ -124,6 +124,21 @@ const accountSchema = new Schema({
   identityDocument: {
     type: String,
   },
+  typeDocument: {
+    type: String,
+  },
+  numberDocument: {
+    type: String,
+  },
+  issuedDateDocument:{
+    type: String,
+  },
+  expiryDateDocument:{
+    type: String,
+  },
+  placeIssueDocument:{
+    type: String,
+  },
   maritalStatus: {
     type: String,
     // enum: ['Célibataire', 'Marié(e)', 'Divorcé(e)', 'Veuf(ve)'],

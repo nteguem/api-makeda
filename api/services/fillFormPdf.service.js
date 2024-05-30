@@ -80,6 +80,21 @@ async function fillPdfFields(inputPath, data) {
             console.log(`Invalid marital value: ${maritalStatus}`);
         }
 
+        // Gérer les boutons radio pour les documents d'identités
+        const typeDocument = data.typeDocument
+        const typeDocumentOptions = ["Carte d'identité", "Passeport", "Carte de Séjour"];
+        
+        if (typeDocumentOptions.includes(typeDocument)) {
+            const radioField = form.getFieldMaybe(typeDocument);
+            if (radioField && radioField.constructor.name === 'PDFCheckBox') {
+                radioField.check();
+            } else {  
+                console.log(`Le bouton radio pour "${typeDocument}" n'existe pas ou n'est pas une case à cocher.`);
+            } 
+        } else {
+            console.log(`Type de document invalide : ${typeDocument}`);
+        }
+        
         // Gérer les boutons radio pour l'objectif répond le placement envisagé
         const investmentObjective = data.investmentObjective;
         const investmentObjectiveOptions = ['Diversification du patrimoine', 'Revenus complémentaires', 'Transmission du patrimoine', 'Diversification de placement', 'Placement de trésorerie', 'Rendement', "Autres"];
