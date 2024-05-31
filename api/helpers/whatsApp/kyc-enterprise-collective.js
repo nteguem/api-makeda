@@ -3,9 +3,18 @@ const { uploadToCloudinary } = require("../../services/uploadFile.service");
 const { sendMediaToNumber } = require("./whatsappMessaging");
 const { fillPdfFields } = require("../../services/fillFormPdf.service");
 const AccountService = require('../../services/account.service');
-const {list} = require("../../services/user.service")
+const { list } = require("../../services/user.service")
 const { getRandomDelay } = require("../../helpers/utils")
 const logger = require("../logger")
+const {ToWords} = require('to-words');
+const toWords = new ToWords({
+    localeCode: 'fr-FR',
+    converterOptions: {
+      currency: false,
+      ignoreDecimal: true,
+      ignoreZeroCurrency: true,
+    }
+  });
 
 // Objet pour stocker l'étape actuelle et les réponses de l'utilisateur
 let userData = {};
@@ -21,7 +30,7 @@ const kycEnterpriseCommander = async (user, msg, client, service) => {
     if (!userData[phoneNumber]) {
       userData[phoneNumber] = {
         step: 1,
-        answers: {} 
+        answers: {}
       };
     }
     const userInput = msg.body; // Entrée de l'utilisateur sans espaces vides
@@ -96,7 +105,7 @@ const kycEnterpriseCommander = async (user, msg, client, service) => {
           userData[phoneNumber].step++;
           break;
         case 10:
-            // Logique pour saisir le prénom du représentant légal
+          // Logique pour saisir le prénom du représentant légal
           userData[phoneNumber].answers["firstName"] = userInput;
           userData[phoneNumber].step++;
           break;
@@ -131,7 +140,7 @@ const kycEnterpriseCommander = async (user, msg, client, service) => {
               userData[phoneNumber].step++;
               countCase = 0;
             }
-          } 
+          }
           else if (userInput.startsWith("A")) {
             userData[phoneNumber].answers["investigationHistory"] = userInput;
             userData[phoneNumber].step++;
@@ -143,11 +152,11 @@ const kycEnterpriseCommander = async (user, msg, client, service) => {
           break;
         case 15:
           if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B" || userInput.toUpperCase() === "C" || userInput.toUpperCase() === "D" || userInput.toUpperCase() === "E") {
-            userData[phoneNumber].answers["investmentObjective"] = 
-            userInput.toUpperCase() === "A" ? 'Diversification de placement' :
-            userInput.toUpperCase() === "B" ? 'Placement de trésorerie' :
-            userInput.toUpperCase() === "C" ? "Revenus complémentaires" :
-            userInput.toUpperCase() === "D" ? "Rendement" : "Autres";
+            userData[phoneNumber].answers["investmentObjective"] =
+              userInput.toUpperCase() === "A" ? 'Diversification de placement' :
+                userInput.toUpperCase() === "B" ? 'Placement de trésorerie' :
+                  userInput.toUpperCase() === "C" ? "Revenus complémentaires" :
+                    userInput.toUpperCase() === "D" ? "Rendement" : "Autres";
             userData[phoneNumber].step++;
           } else {
             msg.reply("Veuillez choisir A, B C , D ou E.");
@@ -240,62 +249,100 @@ const kycEnterpriseCommander = async (user, msg, client, service) => {
             msg.reply("Merci de joindre une image ou un PDF.")
           }
           break;
-          case 27:
-            if (userInput == "Valider") {
-              const pdfBufferFiche = await fillPdfFields(pathTemplateKyc, userData[phoneNumber].answers)
-              const responseClodinaryFiche = await uploadToCloudinary(`${userData[phoneNumber].answers["socialName"]}_fiche`, pdfBufferFiche)
-              userData[phoneNumber].answers["fiche"] = (responseClodinaryFiche);
-              const response = await AccountService.createAccount(userData[phoneNumber].answers);
-              if (response.success) {
-                userData[phoneNumber].step++;
-                const pdfBase64Fiche = pdfBufferFiche.toString("base64");
-                const pdfNameFiche = `${userData[phoneNumber].answers["socialName"]}_kyb`;
-                const documentType = "application/pdf";
-                await sendMediaToNumber(client,phoneNumber, documentType, pdfBase64Fiche, pdfNameFiche)
-                for (const admin of listAdmin.users) {
-                  try {
-                      const content = `Nouveau compte crée pour le service : ${service} ,${userData[phoneNumber].answers["accountType"]} : ${userData[phoneNumber].answers["socialName"]} \n\n consultez la fiche ci-joint.`;
-                      await sendMessageToNumber(client,admin.phoneNumber, content);
-                      await sendMediaToNumber(client, admin.phoneNumber, documentType, pdfBase64Fiche, pdfNameFiche)
-                      const delay = getRandomDelay(5000, 15000);
-                      await new Promise(resolve => setTimeout(resolve, delay));
-                  } catch (error) {
-                    logger(client).error(`Erreur lors de l'envoi ${admin.phoneNumber}`, error);
-                  }
+        case 27:
+          if (userInput == "1") {
+            userData[phoneNumber].answers["typeProductFCP"] = "FCP MAKEDA HORIZON"
+            userData[phoneNumber].step++;
+          }
+          else {
+            msg.reply("Veuillez choisir 1")
+          }
+          break;
+        case 28:
+          userData[phoneNumber].answers["initialAmountFCP"] = userInput;
+          userData[phoneNumber].answers["initialAmountLetterFCP"] = toWords.convert(userInput)+" FCFA";
+          userData[phoneNumber].step++;
+          break;
+        case 29:
+          if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B") {
+            userData[phoneNumber].answers["methodPaiementFCP"] = userInput.toUpperCase() === "A" ? "Virement" : "Mobile money (OM|MOMO)";
+            userData[phoneNumber].step++;
+          } else {
+            msg.reply("Veuillez choisir A, B");
+          }
+          break;
+        case 30:
+          if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B" || userInput.toUpperCase() === "C" || userInput.toUpperCase() === "D") {
+            userData[phoneNumber].answers["frequenceFCP"] =
+              userInput.toUpperCase() === "A" ? "Mensuelle" :
+                userInput.toUpperCase() === "B" ? "Trimestrielle" :
+                  userInput.toUpperCase() === "C" ? "Semestrielle" :
+                    userInput.toUpperCase() === "D" ? "Annuelle" :
+                      "";
+            userData[phoneNumber].step++;
+          } else {
+            msg.reply("Veuillez choisir A, B,C ou D");
+          }
+          break;
+        case 31:
+          userData[phoneNumber].answers["versementFCP"] = userInput;
+          userData[phoneNumber].step++;
+          break;
+        case 32:
+          if (userInput == "Valider") {
+            const pdfBufferFiche = await fillPdfFields(pathTemplateKyc, userData[phoneNumber].answers)
+            const responseClodinaryFiche = await uploadToCloudinary(`${userData[phoneNumber].answers["socialName"]}_fiche`, pdfBufferFiche)
+            userData[phoneNumber].answers["fiche"] = (responseClodinaryFiche);
+            const response = await AccountService.createAccount(userData[phoneNumber].answers);
+            if (response.success) {
+              userData[phoneNumber].step++;
+              const pdfBase64Fiche = pdfBufferFiche.toString("base64");
+              const pdfNameFiche = `${userData[phoneNumber].answers["socialName"]}_kyb`;
+              const documentType = "application/pdf";
+              await sendMediaToNumber(client, phoneNumber, documentType, pdfBase64Fiche, pdfNameFiche)
+              for (const admin of listAdmin.users) {
+                try {
+                  const content = `Nouveau compte crée pour le service : ${service} ,${userData[phoneNumber].answers["accountType"]} : ${userData[phoneNumber].answers["socialName"]} \n\n consultez la fiche ci-joint.`;
+                  await sendMessageToNumber(client, admin.phoneNumber, content);
+                  await sendMediaToNumber(client, admin.phoneNumber, documentType, pdfBase64Fiche, pdfNameFiche)
+                  const delay = getRandomDelay(5000, 15000);
+                  await new Promise(resolve => setTimeout(resolve, delay));
+                } catch (error) {
+                  logger(client).error(`Erreur lors de l'envoi ${admin.phoneNumber}`, error);
+                }
               }
-              } else {
-                logger(client).error("response create account:",response);
-                msg.reply(`echec creation du compte!`)
-              }
+            } else {
+              logger(client).error("response create account:", response);
+              msg.reply(`echec creation du compte!`)
             }
-            else {
-              msg.reply(`Commande${userInput} inconnue veuillez saisir *Valider*`)
-            }
-            break;
-          case 28:
-            userData[phoneNumber] = { step: 1, answers: {} };
-          default:
-            if(userData[phoneNumber].step == 28)
-              {
-                msg.reply(`_𝖳𝖺𝗉𝖾𝗓 # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._`)
-              }
-              else{
-                msg.reply("Étape inconnue.");
-              }
-            break;
+          }
+          else {
+            msg.reply(`Commande${userInput} inconnue veuillez saisir *Valider*`)
+          }
+          break;
+        case 33:
+          userData[phoneNumber] = { step: 1, answers: {} };
+        default:
+          if (userData[phoneNumber].step == 33) {
+            msg.reply(`_𝖳𝖺𝗉𝖾𝗓 # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._`)
+          }
+          else {
+            msg.reply("Étape inconnue.");
+          }
+          break;
       }
     }
 
     // Envoyer le message correspondant à l'étape actuelle
     const currentStepMessage = getCurrentStepMessage(userData[phoneNumber].step);
     if (currentStepMessage && countCase != 1) {
-      const stepMessage = `é𝗍𝖺𝗉𝖾 ${userData[phoneNumber].step}/28\n\n${currentStepMessage}\n\n`;
-      const additionalMessage = (userData[phoneNumber].step == 1 || userData[phoneNumber].step == 28) ?
-          "_𝖳𝖺𝗉𝖾𝗓  # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._" :
-          "_𝖳𝖺𝗉𝖾𝗓 * 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖾𝗇 𝖺𝗋𝗋𝗂è𝗋𝖾, # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._";
-      await sendMessageToNumber(client,phoneNumber, stepMessage + additionalMessage);
-  }
-  
+      const stepMessage = `é𝗍𝖺𝗉𝖾 ${userData[phoneNumber].step}/33\n\n${currentStepMessage}\n\n`;
+      const additionalMessage = (userData[phoneNumber].step == 1 || userData[phoneNumber].step == 33) ?
+        "_𝖳𝖺𝗉𝖾𝗓  # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._" :
+        "_𝖳𝖺𝗉𝖾𝗓 * 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖾𝗇 𝖺𝗋𝗋𝗂è𝗋𝖾, # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._";
+      await sendMessageToNumber(client, phoneNumber, stepMessage + additionalMessage);
+    }
+
 
   } catch (error) {
     logger(client).error("error", error);
@@ -359,10 +406,20 @@ const getCurrentStepMessage = (step) => {
     case 26:
       return "Veuillez joindre l'attestation Numéro Fiscal. \n\n NB: _joindre une image ou un document pdf_";
     case 27:
-      return "Finalisez votre inscription, Makeda Asset Management prendra rendez-vous avec vous par e-mail.\n\n saisir *Valider*";
+      return `Vous avez terminé de créer votre KYC. À quel type de produit souhaitez-vous souscrire ? \n\n 1-FCP MAKEDA HORIZON`;
     case 28:
+      return `Quel est votre montant de souscription initiale ? eg:100000`;
+    case 29:
+      return `📋 *Quel est votre moyen de paiement ?* \n\n A-Virement \n B-Mobile money (OM|MOMO)`;
+    case 30:
+      return `📋 *Quelle est votre fréquence de versement et le montant souhaité ?*  \n\n A-Mensuelle \n B-Trimestrielle \n C-Semestrielle \n D-Annuelle `;
+    case 31:
+      return `Quel est votre montant de versement ? eg:10000 `;
+    case 32:
+      return "Finalisez votre inscription, Makeda Asset Management prendra rendez-vous avec vous par e-mail.\n\n saisir *Valider*";
+    case 33:
       return "Votre compte a été créé avec succès, l’un de nos conseillers prendra attache avec vous pour la suite.";
-      default:
+    default:
       return null;
   }
 };

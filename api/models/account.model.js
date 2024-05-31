@@ -35,7 +35,6 @@ const accountSchema = new Schema({
   },
   FCP: {
     type: String,
-    required: true
   },
   firstName: {
     type: String,
@@ -100,7 +99,25 @@ const accountSchema = new Schema({
     enum: ['Monsieur', 'Madame', 'Autre'],
     // required: true
   },
-
+  typeProductFCP: {
+    type: String,
+  },
+  initialAmountFCP: {
+    type: String,
+  },
+  initialAmountLetterFCP: {
+    type: String,
+  },
+  methodPaiementFCP:{
+    type: String,
+  },
+  frequenceFCP:{
+    type: String,
+  },
+  versementFCP:{
+    type: String,
+  },
+  
   //specific fields  accountType = personne physique
   dateOfBirth: {
     type: Date,

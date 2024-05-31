@@ -3,6 +3,8 @@ const logger = require('../logger');
 const { sendMessageToNumber } = require('./whatsappMessaging');
 const { kycPersonCommander } = require('./kyc-person');
 const { kycEnterpriseCommander } = require('./kyc-enterprise');
+const {kycPersonCollectiveCommander} = require("./kyc-person-collective");
+const {kycEnterpriseCollectiveCommander} = require("./kyc-enterprise-collective");
 const { listAccounts } = require("../../services/account.service");
 const { GainSimulationCommander } = require("./simulator")
 let Steps = {};
@@ -118,11 +120,25 @@ const UserCommander = async (user, msg, client) => {
           switch (msg.body) {
             case "1":
               (Steps[msg.from]["currentMenu"] = "personMenu");
-              await sendMessageToNumber(client, user.data.phoneNumber, `é𝗍𝖺𝗉𝖾 1/29\n\nVeuillez saisir votre nom.\n\n_𝖳𝖺𝗉𝖾𝗓 # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._`);
+              if(Steps[msg.from]["addAccount"]["service"] ===  "Gestion Collective")
+                {
+                  await sendMessageToNumber(client, user.data.phoneNumber, `é𝗍𝖺𝗉𝖾 1/34\n\nVeuillez saisir votre nom.\n\n_𝖳𝖺𝗉𝖾𝗓 # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._`);
+                }
+                else
+                {
+                  await sendMessageToNumber(client, user.data.phoneNumber, `é𝗍𝖺𝗉𝖾 1/29\n\nVeuillez saisir votre nom.\n\n_𝖳𝖺𝗉𝖾𝗓 # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._`);
+                }
               break;
             case "2":
               (Steps[msg.from]["currentMenu"] = "enterpriseMenu");
-              await sendMessageToNumber(client, user.data.phoneNumber, `é𝗍𝖺𝗉𝖾 1/28\n\nVeuillez saisir votre Dénomination sociale.\n\n_𝖳𝖺𝗉𝖾𝗓 # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._`);
+              if(Steps[msg.from]["addAccount"]["service"] ===  "Gestion Collective")
+                {
+                  await sendMessageToNumber(client, user.data.phoneNumber, `é𝗍𝖺𝗉𝖾 1/28\n\nVeuillez saisir votre Dénomination sociale.\n\n_𝖳𝖺𝗉𝖾𝗓 # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._`);
+                }
+                else
+                {
+                  await sendMessageToNumber(client, user.data.phoneNumber, `é𝗍𝖺𝗉𝖾 1/28\n\nVeuillez saisir votre Dénomination sociale.\n\n_𝖳𝖺𝗉𝖾𝗓 # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._`);
+                }
               break;
           }
           break;
@@ -133,7 +149,14 @@ const UserCommander = async (user, msg, client) => {
             Steps[msg.from]["isSubMenu"] = true;
             await sendMessageToNumber(client, user.data.phoneNumber, Menu);
           } else {
-            await kycPersonCommander(user, msg, client, Steps[msg.from]["addAccount"]["service"]);
+            if(Steps[msg.from]["addAccount"]["service"] ===  "Gestion Collective")
+              {
+                await kycPersonCollectiveCommander(user, msg, client, Steps[msg.from]["addAccount"]["service"]);
+              }
+              else
+              {
+                await kycPersonCommander(user, msg, client, Steps[msg.from]["addAccount"]["service"]);
+              }
           }
           break;
         case "enterpriseMenu":
@@ -142,7 +165,14 @@ const UserCommander = async (user, msg, client) => {
             Steps[msg.from]["isSubMenu"] = true;
             await sendMessageToNumber(client, user.data.phoneNumber, Menu);
           } else {
-            await kycEnterpriseCommander(user, msg, client, Steps[msg.from]["addAccount"]["service"]);
+            if(Steps[msg.from]["addAccount"]["service"] ===  "Gestion Collective")
+              {
+                await kycEnterpriseCollectiveCommander(user, msg, client, Steps[msg.from]["addAccount"]["service"]);
+              }
+              else
+              {
+                await kycEnterpriseCommander(user, msg, client, Steps[msg.from]["addAccount"]["service"]);
+              }
           }
           break;
         case "simulateGainMenu":

@@ -5,7 +5,18 @@ const { sendMediaToNumber } = require("./whatsappMessaging");
 const { fillPdfFields } = require("../../services/fillFormPdf.service");
 const {list} = require("../../services/user.service")
 const { getRandomDelay } = require("../../helpers/utils")
-const logger = require("../logger")
+const logger = require("../logger");
+const {ToWords} = require('to-words');
+
+const toWords = new ToWords({
+    localeCode: 'fr-FR',
+    converterOptions: {
+      currency: false,
+      ignoreDecimal: true,
+      ignoreZeroCurrency: true,
+    }
+  });
+  
 // Objet pour stocker l'étape actuelle et les réponses de l'utilisateur
 let userData ={};
 let countCase = 0;
@@ -13,7 +24,7 @@ const pathTemplateKyc = "../../kyc-template/KYC Personne Physique.pdf"
 const pathFCP = "../../kyc-template/FCP Makeda Horizon Person.pdf"
 
 // Fonction pour gérer les commandes de l'utilisateur
-const kycPersonCommander = async (user, msg, client, service) => {
+const kycPersonCollectiveCommander = async (user, msg, client, service) => {
   try {
     const phoneNumber = user.data.phoneNumber;
     const listAdmin = await list("admin");
@@ -259,10 +270,54 @@ const kycPersonCommander = async (user, msg, client, service) => {
           }
           break;
         case 28:
+            if(userInput == "1")
+                {
+               userData[phoneNumber].answers["typeProductFCP"] = "FCP MAKEDA HORIZON"
+               userData[phoneNumber].step++;    
+                }
+             else
+             {
+             msg.reply("Veuillez choisir 1")
+             }
+          break;
+        case 29:
+            userData[phoneNumber].answers["initialAmountFCP"] = userInput;
+            userData[phoneNumber].answers["initialAmountLetterFCP"] = toWords.convert(userInput)+" FCFA";
+            userData[phoneNumber].step++; 
+          break;
+        case 30:
+            if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B") {
+                userData[phoneNumber].answers["methodPaiementFCP"] =  userInput.toUpperCase() === "A" ? "Virement" : "Mobile money (OM|MOMO)";
+                userData[phoneNumber].step++; 
+            } else {
+                msg.reply("Veuillez choisir A, B");
+              }
+          break;
+        case 31:
+            if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B"|| userInput.toUpperCase() === "C"|| userInput.toUpperCase() === "D") {
+                userData[phoneNumber].answers["frequenceFCP"] = 
+                userInput.toUpperCase() === "A" ? "Mensuelle" :
+                userInput.toUpperCase() === "B" ? "Trimestrielle" :
+                userInput.toUpperCase() === "C" ? "Semestrielle" :
+                userInput.toUpperCase() === "D" ? "Annuelle" :
+                "";
+                userData[phoneNumber].step++;
+              } else {
+                msg.reply("Veuillez choisir A, B,C ou D");
+              }
+          break;
+        case 32:
+            userData[phoneNumber].answers["versementFCP"] = userInput;
+            userData[phoneNumber].step++;
+          break;
+        case 33:
           if (userInput == "Valider") {
             const pdfBufferFiche = await fillPdfFields(pathTemplateKyc, userData[phoneNumber].answers)
             const responseClodinaryFiche = await uploadToCloudinary(`${userData[phoneNumber].answers["name"]}_fiche`, pdfBufferFiche)
             userData[phoneNumber].answers["fiche"] = (responseClodinaryFiche);
+                const pdfBufferFCP = await fillPdfFields(pathFCP, userData[phoneNumber].answers)
+                const responseClodinaryFCP = await uploadToCloudinary(`${userData[phoneNumber].answers["name"]}_FCP Makeda Horizon`, pdfBufferFCP)
+                userData[phoneNumber].answers["FCP"] = (responseClodinaryFCP);
             const response = await AccountService.createAccount(userData[phoneNumber].answers);
             if (response.success) {
               userData[phoneNumber].step++;
@@ -270,11 +325,15 @@ const kycPersonCommander = async (user, msg, client, service) => {
               const pdfNameFiche = `${userData[phoneNumber].answers["name"]}_kyc`;
               const documentType = "application/pdf";
               await sendMediaToNumber(client, phoneNumber, documentType, pdfBase64Fiche, pdfNameFiche)
+                  const pdfBase64FCP = pdfBufferFCP.toString("base64");
+                  const pdfNameFCP = `${userData[phoneNumber].answers["name"]}_FCP`;
+                  await sendMediaToNumber(client, phoneNumber, documentType, pdfBase64FCP, pdfNameFCP)
               for (const admin of listAdmin.users) {
                 try {
                     const content = `Nouveau compte crée pour le service : ${service} ,${userData[phoneNumber].answers["accountType"]} : ${userData[phoneNumber].answers["name"]} \n\n consultez la fiche ci-joint.`;
                     await sendMessageToNumber(client,admin.phoneNumber, content);
                     await sendMediaToNumber(client, admin.phoneNumber, documentType, pdfBase64Fiche, pdfNameFiche)
+                    await sendMediaToNumber(client, admin.phoneNumber, documentType, pdfBase64FCP, pdfNameFCP)
                     const delay = getRandomDelay(5000, 15000);
                     await new Promise(resolve => setTimeout(resolve, delay));
                 } catch (error) {
@@ -290,10 +349,10 @@ const kycPersonCommander = async (user, msg, client, service) => {
             msg.reply(`Commande${userInput} inconnue veuillez saisir *Valider*`)
           }
           break;
-        case 29:
+        case 34:
           userData[phoneNumber] = { step: 1, answers: {} };
         default:
-          if(userData[phoneNumber].step == 29)
+          if(userData[phoneNumber].step == 34)
             {
               msg.reply(`_𝖳𝖺𝗉𝖾𝗓 # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._`)
             }
@@ -306,8 +365,8 @@ const kycPersonCommander = async (user, msg, client, service) => {
     // Envoyer le message correspondant à l'étape actuelle
     const currentStepMessage = getCurrentStepMessage(userData[phoneNumber].step);
     if (currentStepMessage && countCase != 1) {
-      const stepMessage = `é𝗍𝖺𝗉𝖾 ${userData[phoneNumber].step}/29\n\n${currentStepMessage}\n\n`;
-      const additionalMessage = (userData[phoneNumber].step == 1 || userData[phoneNumber].step == 29 || userData[phoneNumber].step == 28) ?
+      const stepMessage = `é𝗍𝖺𝗉𝖾 ${userData[phoneNumber].step}/34\n\n${currentStepMessage}\n\n`;
+      const additionalMessage = (userData[phoneNumber].step == 1 || userData[phoneNumber].step == 34 || userData[phoneNumber].step == 33) ?
           "_𝖳𝖺𝗉𝖾𝗓  # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._" :
           "_𝖳𝖺𝗉𝖾𝗓 * 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖾𝗇 𝖺𝗋𝗋𝗂è𝗋𝖾, # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._";
       await sendMessageToNumber(client, phoneNumber, stepMessage + additionalMessage);
@@ -413,13 +472,23 @@ const getCurrentStepMessage = (step) => {
     case 27:
       return "Veuillez joindre le justificatif de revenu.\n\n NB: _joindre une image ou un document pdf_";
     case 28:
-      return "Finalisez votre inscription, Makeda Asset Management prendra rendez-vous avec vous par e-mail.\n\n saisir *Valider*";
+      return `Vous avez terminé de créer votre KYC. À quel type de produit souhaitez-vous souscrire ? \n\n 1-FCP MAKEDA HORIZON`;
     case 29:
-      return "Votre compte a été créé avec succès, l’un de nos conseillers prendra attache avec vous pour la suite.";
-    default:
+      return `Quel est votre montant de souscription initiale ? eg:100000`;
+    case 30:
+      return `📋 *Quel est votre moyen de paiement ?* \n\n A-Virement \n B-Mobile money (OM|MOMO)`;
+    case 31:
+      return `📋 *Quelle est votre fréquence de versement et le montant souhaité ?*  \n\n A-Mensuelle \n B-Trimestrielle \n C-Semestrielle \n D-Annuelle `; 
+    case 32:
+      return `Quel est votre montant de versement ? eg:10000 `; 
+    case 33:
+      return "Finalisez votre inscription, Makeda Asset Management prendra rendez-vous avec vous par e-mail.\n\n saisir *Valider*";
+    case 34:
+        return "Votre compte a été créé avec succès, l’un de nos conseillers prendra attache avec vous pour la suite.";
+        default:
       return null;
   }
 };
 module.exports = {
-  kycPersonCommander,
+  kycPersonCollectiveCommander,
 };

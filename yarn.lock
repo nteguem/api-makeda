@@ -1758,6 +1758,11 @@ npmlog@^5.0.1:
     gauge "^3.0.0"
     set-blocking "^2.0.0"
 
+num-words@^1.2.3:
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/num-words/-/num-words-1.2.3.tgz#f6c33b7cdf14f1b0c4198d1ab7bcf9da9a17116d"
+  integrity sha512-tfKqF8sCX1sb2LjrZyrqNF7SDyDzxcyKtpNlRqqaOTImmqTEclGYEs17FtpbXsuuyJijwOWzuTy+DasYf/FvlA==
+
 object-assign@^4, object-assign@^4.1.1:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/object-assign/-/object-assign-4.1.1.tgz#2109adc7965887cfc05cbbd442cac8bfbb360863"
@@ -2363,6 +2368,11 @@ to-regex-range@^5.0.1:
   integrity sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==
   dependencies:
     is-number "^7.0.0"
+
+to-words@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/to-words/-/to-words-4.0.1.tgz#e24f8ee3b5b3024aa65a27a66f561b7bfd660eda"
+  integrity sha512-HzVs4DbkPk1nJsBnllotj44tEXc5SIZIKpSwRanNe1fy1hFbBgipZSOmNYVvmZQMkQfBQf9mA6F6XbNU2QuA0A==
 
 toidentifier@1.0.1:
   version "1.0.1"

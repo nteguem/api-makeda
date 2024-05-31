@@ -94,6 +94,23 @@ async function fillPdfFields(inputPath, data) {
         } else {
             console.log(`Type de document invalide : ${typeDocument}`);
         }
+
+           // Gérer les boutons radio pour les types de documents
+           const methodPaiementDocument = data.methodPaiementFCP
+           const methodPaiementOptions = ["Virement", "Mobile money (OM|MOMO)"];
+           
+           if (methodPaiementOptions.includes(methodPaiementDocument)) {
+               const radioField = form.getFieldMaybe(methodPaiementDocument);
+               if (radioField && radioField.constructor.name === 'PDFCheckBox') {
+                   radioField.check();
+               } else {  
+                   console.log(`Le bouton radio pour "${methodPaiementDocument}" n'existe pas ou n'est pas une case à cocher.`);
+               } 
+           } else {
+               console.log(`Type de document invalide : ${methodPaiementDocument}`);
+           }
+           
+        
         
         // Gérer les boutons radio pour l'objectif répond le placement envisagé
         const investmentObjective = data.investmentObjective;
