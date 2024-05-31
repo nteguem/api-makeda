@@ -294,12 +294,13 @@ const kycPersonCollectiveCommander = async (user, msg, client, service) => {
               }
           break;
         case 31:
-            if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B"|| userInput.toUpperCase() === "C"|| userInput.toUpperCase() === "D") {
+            if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B"|| userInput.toUpperCase() === "C"|| userInput.toUpperCase() === "D"|| userInput.toUpperCase() === "E") {
                 userData[phoneNumber].answers["frequenceFCP"] = 
                 userInput.toUpperCase() === "A" ? "Mensuelle" :
                 userInput.toUpperCase() === "B" ? "Trimestrielle" :
                 userInput.toUpperCase() === "C" ? "Semestrielle" :
                 userInput.toUpperCase() === "D" ? "Annuelle" :
+                userInput.toUpperCase() === "E" ? "RAS" :
                 "";
                 userData[phoneNumber].step++;
               } else {
@@ -474,11 +475,11 @@ const getCurrentStepMessage = (step) => {
     case 28:
       return `Vous avez terminé de créer votre KYC. À quel type de produit souhaitez-vous souscrire ? \n\n 1-FCP MAKEDA HORIZON`;
     case 29:
-      return `Quel est votre montant de souscription initiale ? eg:100000`;
+      return `Nom du produit : FCP MAKEDA HORIZON\nCatégorie : Obligataire\nRendement minimum : 5% net/ an pouvant aller à la hausse selon la flexibilité du marché\nHorizon de placement recommandé : 2 ans\nMinimum de souscription : 10 Milles XAF\nProduit défiscalisé\n\nQuel est votre montant de souscription initiale ? eg:100000`;
     case 30:
       return `📋 *Quel est votre moyen de paiement ?* \n\n A-Virement \n B-Mobile money (OM|MOMO)`;
     case 31:
-      return `📋 *Quelle est votre fréquence de versement et le montant souhaité ?*  \n\n A-Mensuelle \n B-Trimestrielle \n C-Semestrielle \n D-Annuelle `; 
+      return `📋 *quel est votre montant de versement selon votre fréquence envisagée ?*  \n\n A-Mensuelle \n B-Trimestrielle \n C-Semestrielle \n D-Annuelle `; 
     case 32:
       return `Quel est votre montant de versement ? eg:10000 `; 
     case 33:

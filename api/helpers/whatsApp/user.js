@@ -85,12 +85,12 @@ const UserCommander = async (user, msg, client) => {
           switch (msg.body) {
             case "1":
               Steps[msg.from]["addAccount"]["service"] = "Gestion sous Mandat";
-              await sendMessageToNumber(client, user.data.phoneNumber, "📋 *Vous êtes* : \n 1-Personne physique , Tapez 1 \n 2-Personne morale , Tapez 2");
+              await sendMessageToNumber(client, user.data.phoneNumber, "Gestion sur mesure avec conditions définies dans le cadre d’un mandat de gestion avec vous.\n Caractéristiques :\n - Signature de la convention de gestion\n - Capital minimum : 100 Millions de XAF\n - Rendement escompté : A négocier\n - Performance : A négocier\n - Horizon de placement minimum : 3 ans\n - Marché ciblé : Marché monétaire, Marché financier et Marché hors cote\n\n📋 *Vous êtes* : \n 1-Personne physique , Tapez 1 \n 2-Personne morale , Tapez 2");
               Steps[msg.from]["currentMenu"] = "accountTypeMenu";
               break;
             case "2":
               Steps[msg.from]["addAccount"]["service"] = "Gestion Collective";
-              await sendMessageToNumber(client, user.data.phoneNumber, "📋 *Vous êtes* : \n 1-Personne physique , Tapez 1 \n 2-Personne morale , Tapez 2");
+              await sendMessageToNumber(client, user.data.phoneNumber, "Gestion mutualisée à travers des organismes de placement collectif, Création des véhicules d'investissement \n *Avantages pour le souscripteur:*\n - Diversification du portefeuille\n - Rendement Optimal\n - Optimisation fiscale\n - Construction du capital pour un projet\n - Planification des Études des enfants\n - la flexibilité du titre ( liquidité : vous pouvez entrer et sortir à tout moment)\n - Gestion assurée par des Professionnels de la Finance\n - La transparence de l'information et la possibilité de participer à des marchés financiers auxquels vous n'aurait pas accès individuellement\n - la transmission du patrimoine\n\n📋 *Vous êtes* : \n 1-Personne physique , Tapez 1 \n 2-Personne morale , Tapez 2");
               Steps[msg.from]["currentMenu"] = "accountTypeMenu";
               break;
             case "3":
