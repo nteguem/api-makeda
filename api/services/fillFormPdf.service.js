@@ -170,12 +170,13 @@ async function fillPdfFields(inputPath, data) {
             console.log(`Invalid capitalOrigin value: ${capitalOrigin}`);
         }
 
-        // Rendre les champs en lecture seule
+        //Rendre les champs en lecture seule
         form.getFields().forEach(field => {
             if (field.enableReadOnly) {
                 field.enableReadOnly();
             }
         });
+       
         const pdfBytes = await pdfDoc.save();
         return Buffer.from(pdfBytes, 'base64');
     } catch (err) {

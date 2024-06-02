@@ -128,6 +128,12 @@ const accountSchema = new Schema({
   nationality: {
     type: String,
   },
+  countryOfResidence:{
+    type: String,
+  },
+  cityOfResidence:{
+    type: String,
+  },
   profession: {
     type: String,
   },

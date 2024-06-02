@@ -81,9 +81,13 @@ const kycEnterpriseCommander = async (user, msg, client, service) => {
           userData[phoneNumber].step++;
           break;
         case 7:
-          // Logique pour saisir l'adresse email de l'entreprise
-          userData[phoneNumber].answers["email"] = userInput;
-          userData[phoneNumber].step++;
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (emailRegex.test(userInput.trim())) {
+              userData[phoneNumber].answers["email"] = userInput.trim();
+              userData[phoneNumber].step++;
+          } else {
+              msg.reply("Veuillez entrer une adresse email valide (ex: exemple@domaine.com).");
+          }
           break;
         case 8:
           // Logique pour saisir le numéro de téléphone de l'entreprise
