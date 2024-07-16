@@ -32,6 +32,7 @@ async function fillPdfFields(inputPath, data) {
             'Rendement',
             'Autres'
         ]);
+        await fillRadioFields(form, data, 'riskLevel', ['Très faible','Faible','Moyen','Très élevé']);
         await fillRadioFields(form, data, 'financialMarketExperience', ['Oui', 'Non']);
         await fillRadioFields(form, data, 'investmentHorizon', ['Court-terme', 'Moyen-terme', 'Long-terme']);
         await fillRadioFields(form, data, 'capitalOrigin', ['épargne', 'crédit', 'cession d\'actifs', 'fonds propres', 'héritage familiale']);
@@ -48,7 +49,7 @@ async function fillPdfFields(inputPath, data) {
 
 async function fillTextFields(form, data) {
     for (const fieldName in data) {
-        if (['civility', 'typeProfession', 'maritalStatus', 'typeDocument', 'methodPaiementFCP', 'investmentObjective', 'financialMarketExperience', 'investmentHorizon', 'capitalOrigin'].includes(fieldName)) {
+        if (['civility', 'typeProfession', 'maritalStatus', 'typeDocument', 'methodPaiementFCP','riskLevel', 'investmentObjective', 'financialMarketExperience', 'investmentHorizon', 'capitalOrigin'].includes(fieldName)) {
             continue;
         }
 

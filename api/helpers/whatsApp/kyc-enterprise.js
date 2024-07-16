@@ -100,11 +100,6 @@ const kycEnterpriseCommander = async (user, msg, client, service) => {
           userData[phoneNumber].step++;
           break;
         case 10:
-            // Logique pour saisir le prénom du représentant légal
-          userData[phoneNumber].answers["firstName"] = userInput;
-          userData[phoneNumber].step++;
-          break;
-        case 11:
           // Logique pour sélectionner le type de représentant légal
           if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B" || userInput.toUpperCase() === "C") {
             userData[phoneNumber].answers["civility"] = userInput.toUpperCase() === "A" ? "Monsieur" : (userInput.toUpperCase() === "B" ? "Madame" : "Autre");
@@ -113,17 +108,17 @@ const kycEnterpriseCommander = async (user, msg, client, service) => {
             msg.reply("Veuillez choisir A, B ou C.");
           }
           break;
-        case 12:
+        case 11:
           // Logique pour saisir le rôle du représentant légal
           userData[phoneNumber].answers["actingAs"] = userInput;
           userData[phoneNumber].step++;
           break;
-        case 13:
+        case 12:
           // Logique pour saisir l'adresse complète de l'entreprise
           userData[phoneNumber].answers["address"] = userInput;
           userData[phoneNumber].step++;
           break;
-        case 14:
+        case 13:
           // Logique pour répondre à la question sur les enquêtes
           countCase = 1;
           if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B") {
@@ -145,7 +140,7 @@ const kycEnterpriseCommander = async (user, msg, client, service) => {
             msg.reply("Veuillez choisir A ou B.");
           }
           break;
-        case 15:
+        case 14:
           if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B" || userInput.toUpperCase() === "C" || userInput.toUpperCase() === "D" || userInput.toUpperCase() === "E") {
             userData[phoneNumber].answers["investmentObjective"] = 
             userInput.toUpperCase() === "A" ? 'Diversification de placement' :
@@ -157,7 +152,7 @@ const kycEnterpriseCommander = async (user, msg, client, service) => {
             msg.reply("Veuillez choisir A, B C , D ou E.");
           }
           break;
-        case 16:
+        case 15:
           if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B" || userInput.toUpperCase() === "C") {
             userData[phoneNumber].answers["investmentHorizon"] = userInput.toUpperCase() === "A" ? "Court-terme" : (userInput.toUpperCase() === "B" ? "Moyen-terme" : "Long-terme");
             userData[phoneNumber].step++;
@@ -165,62 +160,53 @@ const kycEnterpriseCommander = async (user, msg, client, service) => {
             msg.reply("Veuillez choisir A, B ou C.");
           }
           break;
-        case 17:
-          if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B" || userInput.toUpperCase() === "C") {
-            userData[phoneNumber].answers["riskLevel"] = userInput.toUpperCase() === "A" ? "Faible" : (userInput.toUpperCase() === "B" ? "Moyen" : "Élevé");
+        case 16:
+          if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B" || userInput.toUpperCase() === "C"|| userInput.toUpperCase() === "D") {
+            userData[phoneNumber].answers["riskLevel"] = userInput.toUpperCase() === "A" ? "Très faible" : userInput.toUpperCase() === "B" ? "Faible": userInput.toUpperCase() === "C" ? "Moyen" : "Très élevé";
             userData[phoneNumber].step++;
           } else {
-            msg.reply("Veuillez choisir A, B ou C.");
+            msg.reply("Veuillez choisir A, B , C ou D.");
           }
           break;
-        case 18:
-          countCase = 1;
+        case 17:
           if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B") {
-            if (userInput.toUpperCase() === "A") {
-              // Si l'utilisateur choisit l'option A (Oui), demandez le nombre d'années d'expérience
-              msg.reply("Veuillez fournir le nombre d'années d'expérience sur ce format [nombre d'année] (eg:10)");
-            } else {
-              // Si l'utilisateur choisit une autre option, enregistrez simplement la réponse
-              userData[phoneNumber].answers["financialMarketExperience"] = userInput.toUpperCase() === "A" ? "Oui" : "Non";
-              userData[phoneNumber].step++;
-              countCase = 0;
-            }
-          } else if (!isNaN(userInput)) {
-            // Si l'utilisateur saisit le nombre d'années d'expérience dans le format spécifié (A-[nombre d'année])
-            const experienceYears = userInput.trim();
-            userData[phoneNumber].answers["financialMarketExperience"] = `Oui`;
-            userData[phoneNumber].answers["financialMarketExperienceNumber"] = experienceYears;
+            // Si l'utilisateur choisit une autre option, enregistrez simplement la réponse
+            userData[phoneNumber].answers["financialMarketExperience"] = userInput.toUpperCase() === "A" ? "Oui" : "Non";
             userData[phoneNumber].step++;
-            countCase = 0;
+            countCase = 0; 
+        }  else {
+          msg.reply("Veuillez choisir A ou B.");
+        }
+          break;
+        case 18:
+          if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B" || userInput.toUpperCase() === "C"|| userInput.toUpperCase() === "D") {
+            userData[phoneNumber].answers["financialSituationLastThreeYears"] = userInput.toUpperCase() === "A" ? "Difficile" : userInput.toUpperCase() === "B" ? "Stable": userInput.toUpperCase() === "C" ? "Bonne performance" : "Très bonne croissance";
+            userData[phoneNumber].step++;
           } else {
-            msg.reply("Veuillez choisir A ou B.");
+            msg.reply("Veuillez choisir A, B , C ou D.");
           }
           break;
         case 19:
-          userData[phoneNumber].answers["financialSituationLastThreeYears"] = userInput;
-          userData[phoneNumber].step++;
-          break;
-        case 20:
           userData[phoneNumber].answers["mainActivity"] = userInput;
           userData[phoneNumber].step++;
           break;
-        case 21:
+        case 20:
           userData[phoneNumber].answers["secondaryActivity"] = userInput;
           userData[phoneNumber].step++;
           break;
-        case 22:
+        case 21:
           userData[phoneNumber].answers["natureActivity"] = userInput;
           userData[phoneNumber].step++;
           break;
-        case 23:
+        case 22:
           userData[phoneNumber].answers["receivesSubsidies"] = userInput;
           userData[phoneNumber].step++;
           break;
-        case 24:
+        case 23:
           userData[phoneNumber].answers["bankDomiciliation"] = userInput;
           userData[phoneNumber].step++;
           break;
-        case 25:
+        case 24:
           if (msg.hasMedia && (msg.type === "image" || msg.type === "document")) {
             const media = await msg.downloadMedia();
             const bufferData = await Buffer.from(media.data, 'base64');
@@ -232,7 +218,7 @@ const kycEnterpriseCommander = async (user, msg, client, service) => {
             msg.reply("Merci de joindre une image ou un PDF.")
           }
           break;
-        case 26:
+        case 25:
           if (msg.hasMedia && (msg.type === "image" || msg.type === "document")) {
             const media = await msg.downloadMedia();
             const bufferData = await Buffer.from(media.data, 'base64');
@@ -244,7 +230,7 @@ const kycEnterpriseCommander = async (user, msg, client, service) => {
             msg.reply("Merci de joindre une image ou un PDF.")
           }
           break;
-          case 27:
+          case 26:
             if (userInput == "Valider") {
               const pdfBufferFiche = await fillPdfFields(pathTemplateKyc, userData[phoneNumber].answers)
               const responseClodinaryFiche = await uploadToCloudinary(`${userData[phoneNumber].answers["socialName"]}_fiche`, pdfBufferFiche)
@@ -276,10 +262,10 @@ const kycEnterpriseCommander = async (user, msg, client, service) => {
               msg.reply(`Commande${userInput} inconnue veuillez saisir *Valider*`)
             }
             break;
-          case 28:
+          case 27:
             userData[phoneNumber] = { step: 1, answers: {} };
           default:
-            if(userData[phoneNumber].step == 28)
+            if(userData[phoneNumber].step == 27)
               {
                 msg.reply(`_𝖳𝖺𝗉𝖾𝗓 # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._`)
               }
@@ -293,8 +279,8 @@ const kycEnterpriseCommander = async (user, msg, client, service) => {
     // Envoyer le message correspondant à l'étape actuelle
     const currentStepMessage = getCurrentStepMessage(userData[phoneNumber].step);
     if (currentStepMessage && countCase != 1) {
-      const stepMessage = `é𝗍𝖺𝗉𝖾 ${userData[phoneNumber].step}/28\n\n${currentStepMessage}\n\n`;
-      const additionalMessage = (userData[phoneNumber].step == 1 || userData[phoneNumber].step == 28) ?
+      const stepMessage = `é𝗍𝖺𝗉𝖾 ${userData[phoneNumber].step}/27\n\n${currentStepMessage}\n\n`;
+      const additionalMessage = (userData[phoneNumber].step == 1 || userData[phoneNumber].step == 27) ?
           "_𝖳𝖺𝗉𝖾𝗓  # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._" :
           "_𝖳𝖺𝗉𝖾𝗓 * 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖾𝗇 𝖺𝗋𝗋𝗂è𝗋𝖾, # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._";
       await sendMessageToNumber(client,phoneNumber, stepMessage + additionalMessage);
@@ -327,44 +313,42 @@ const getCurrentStepMessage = (step) => {
     case 8:
       return "Veuillez saisir le numéro de téléphone (eg:_(+237)697874621_).";
     case 9:
-      return "Veuillez saisir le Nom";
+      return "Veuillez saisir votre nom et prénom.";
     case 10:
-      return "Veuillez saisir le Prénom";
-    case 11:
       return "📋 *Représentant légal* : \n A-Monsieur ,\n B-Madame ,\n C-Autre ,\n"
-    case 12:
+    case 11:
       return `*Agissant en qualité de* (⚠_Dûment habilité(e)s_): \n\n Veuillez saisir votre rôle`;
-    case 13:
+    case 12:
       return "Veuillez saisir l'adresse complete (eg:_Avenue du Général de Gaulle, Quartier Bonapriso, B.P. 12345, Douala, Littoral, Cameroun_).";
-    case 14:
+    case 13:
       return "📋 *Votre organisation ou l'un de ses propriétaires, administrateurs, dirigeants ou employés ont-ils fait l'objet d'enquêtes, de condamnations, d'exclusions ou de suspensions professionnelles liées à la corruption, à la fraude, au blanchiment d'argent, aux sanctions, au contrôle des exportations, à l'esclavage moderne ou à des infractions connexes ?* : \n A-Oui ,\n B-Non";
-    case 15:
+    case 14:
       return "📋 *quel objectif répond le placement envisagé ?* : \n A-Diversification de placement ,\n B-Placement de trésorerie ,\n C-Revenus complémentaires ,\n D-Rendement ,\n E-Autres";
-    case 16:
+    case 15:
       return "📋 *Horizon de placement* : \n A-Court-terme (moins de 2 ans),\n B-Moyen-terme (2-5 ans),\n C-Long-terme (Plus de 5 ans).";
+    case 16:
+      return "📋 *Quel est votre niveau d’échelle de risque face au marché financier* : \n A-Très faible ,\n B-Faible ,\n C-Moyen \n D-Très élevé.";
     case 17:
-      return "📋 *Quel est votre niveau de risque* : \n A-Faible ,\n B-Moyenne ,\n C-Élevée.";
+      return "📋 *Avez-vous connaissance des produits de trésorerie et du marché financier ?* :\n A-Oui,\n B-Non ";
     case 18:
-      return "📋 *Avez-vous une expérience professionnelle vous permettant d’acquérir une bonne connaissance des marchés financiers ?* :\n A-Oui,\n B-Non \n *NB*: si Oui veuillez fournir le nombre d'année d'expérience sur ce format A-[nombre d'année] (eg:A-10)";
+      return "Quelle a été votre situation financière durant ces trois (03) dernières années : \n A-Difficile ,\n B-Stable ,\n C-Bonne performance \n C-Très bonne croissance";
     case 19:
-      return "Décrivez en une phrase votre situation financière durant les trois (03) dernières années.";
-    case 20:
       return "Décrivez votre activité principale";
-    case 21:
+    case 20:
       return "Décrivez votre activité secondaire";
-    case 22:
+    case 21:
       return "Décrivez la nature de votre activité";
-    case 23:
+    case 22:
       return "L'entreprise bénéficie-t-elle parfois à des subventions privées ou d'État?";
-    case 24:
+    case 23:
       return "Veuillez saisir le nom de votre banque partenaire et domiciliation";
-    case 25:
+    case 24:
       return "Veuillez joindre le Relevé RIB. \n\n NB: _joindre une image ou un document pdf_";
-    case 26:
+    case 25:
       return "Veuillez joindre l'attestation Numéro Fiscal. \n\n NB: _joindre une image ou un document pdf_";
-    case 27:
+    case 26:
       return "Finalisez votre inscription, Makeda Asset Management prendra rendez-vous avec vous par e-mail.\n\n saisir *Valider*";
-    case 28:
+    case 27:
       return "Votre compte a été créé avec succès, l’un de nos conseillers prendra attache avec vous pour la suite.";
       default:
       return null;

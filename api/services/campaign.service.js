@@ -149,7 +149,6 @@ async function scheduleCampaignTasks(launch,client) {
     const result = await listCampaigns({ type: 'Automatically' });
     result?.campaigns?.forEach((campaign, index) => {
         let cronExpression;
-
         switch (campaign.periodicity.toLowerCase()) {
             case "daily":
                 cronExpression = '0 10 * * *';

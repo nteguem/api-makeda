@@ -5,6 +5,7 @@ const menuContent = `
 4️⃣ Parrainnage, tapez 4.
 5️⃣ Simulez vos gains, tapez 5.
 6️⃣ Mon compte, tapez 6.
+7️⃣ Effectuez un versement , tapez 7.
     
 Votre avenir financier, notre expertise personnalisée 🤝`;
 
