@@ -36,10 +36,6 @@ const accountSchema = new Schema({
   FCP: {
     type: String,
   },
-  firstName: {
-    type: String,
-    required: true
-  },
   address: {
     type: String,
   },
@@ -76,7 +72,6 @@ const accountSchema = new Schema({
   },
   riskLevel: {
     type: String,
-    enum: ['Faible', 'Moyen', 'Élevé'],
     required: true
   },
   financialSituationLastThreeYears: {

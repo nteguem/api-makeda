@@ -23,7 +23,7 @@ const pathTemplateKyc = "../../kyc-template/KYB Personne Morale.pdf"
 const pathFCP = "../../kyc-template/FCP Makeda Horizon Enterprise.pdf"
 
 // Fonction pour gérer les commandes de l'utilisateur
-const kycEnterpriseCommander = async (user, msg, client, service) => {
+const kycEnterpriseCollectiveCommander = async (user, msg, client, service) => {
   try {
     const phoneNumber = user.data.phoneNumber;
     const listAdmin = await list("admin");
@@ -374,11 +374,11 @@ const getCurrentStepMessage = (step) => {
     case 15:
       return "📋 *Horizon de placement* : \n A-Court-terme (moins de 2 ans),\n B-Moyen-terme (2-5 ans),\n C-Long-terme (Plus de 5 ans).";
     case 16:
-      return "📋 *Quel est votre niveau de risque* : \n A-Faible ,\n B-Moyenne ,\n C-Élevée.";
+      return "📋 *Quel est votre niveau d’échelle de risque face au marché financier* : \n A-Très faible ,\n B-Faible ,\n C-Moyen \n D-Très élevé.";
     case 17:
-      return "📋 *Avez-vous une expérience professionnelle vous permettant d’acquérir une bonne connaissance des marchés financiers ?* :\n A-Oui,\n B-Non \n *NB*: si Oui veuillez fournir le nombre d'année d'expérience sur ce format A-[nombre d'année] (eg:A-10)";
+      return "📋 *Avez-vous connaissance des produits de trésorerie et du marché financier ?* :\n A-Oui,\n B-Non ";
     case 18:
-      return "Décrivez en une phrase votre situation financière durant les trois (03) dernières années.";
+      return "📋 *Quelle a été votre situation financière durant ces trois (03) dernières années* : \n A-Difficile ,\n B-Stable ,\n C-Bonne performance \n D-Très bonne croissance";
     case 19:
       return "Décrivez votre activité principale";
     case 20:
@@ -412,5 +412,5 @@ const getCurrentStepMessage = (step) => {
   }
 };
 module.exports = {
-  kycEnterpriseCommander,
+  kycEnterpriseCollectiveCommander,
 };

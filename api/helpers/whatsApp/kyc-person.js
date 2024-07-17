@@ -408,7 +408,7 @@ const getCurrentStepMessage = (step) => {
     case 21:
       return "📋 *Quel est votre niveau d’échelle de risque face au marché financier* : \n A-Très faible ,\n B-Faible ,\n C-Moyen \n D-Très élevé.";
     case 22:
-      return "Décrivez en une phrase votre situation financière durant les trois (03) dernières années.";
+      return "📋 *Quelle a été votre situation financière durant ces trois (03) dernières années* : \n A-Difficile ,\n B-Stable ,\n C-Bonne performance \n D-Très bonne croissance";
     case 23:
       return "📋 *Nature et origine des capitaux investis* :\n A-Epargne ,\n B-Credit ,\n C-Cession d'actifs ,\n D-Fonds propres,\n E-Héritage Familiale,\n F-Autres";
     case 24:

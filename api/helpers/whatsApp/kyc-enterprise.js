@@ -331,7 +331,7 @@ const getCurrentStepMessage = (step) => {
     case 17:
       return "📋 *Avez-vous connaissance des produits de trésorerie et du marché financier ?* :\n A-Oui,\n B-Non ";
     case 18:
-      return "Quelle a été votre situation financière durant ces trois (03) dernières années : \n A-Difficile ,\n B-Stable ,\n C-Bonne performance \n C-Très bonne croissance";
+      return "📋 *Quelle a été votre situation financière durant ces trois (03) dernières années* : \n A-Difficile ,\n B-Stable ,\n C-Bonne performance \n D-Très bonne croissance";
     case 19:
       return "Décrivez votre activité principale";
     case 20:

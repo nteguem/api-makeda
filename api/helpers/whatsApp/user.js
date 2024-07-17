@@ -66,7 +66,7 @@ const UserCommander = async (user, msg, client) => {
               break;
             case "7":
                 Steps[msg.from]["isSubMenu"] = true;
-                msg.reply(`📋 *Cliquez sur ce lien pour effectuer un versement\n\n _Tapez # pour revenir au menu principal_`);
+                msg.reply(`Cliquez ici pour faire un versement : https://goto.maviance.info/v1/qg3-sTUSR \n\n _Tapez # pour revenir au menu principal_`);
                 Steps[msg.from]["currentMenu"] = "versementMenu";
                 break;
             case "#":
