@@ -406,7 +406,7 @@ const getCurrentStepMessage = (step) => {
     case 31:
       return "Finalisez votre inscription, Makeda Asset Management prendra rendez-vous avec vous par e-mail.\n\n saisir *Valider*";
     case 32:
-      return `Votre compte a été créé avec succès, l’un de nos conseillers prendra attache avec vous pour la suite.\nFaites un premier versement ici: https://goto.maviance.info/v1/qg3-sTUSR`;
+      return `Votre compte a été créé avec succès, l’un de nos conseillers prendra attache avec vous pour la suite.\nFaites votre premier versement ici: https://goto.maviance.info/v1/qg3-sTUSR`;
     default:
       return null;
   }
