@@ -333,13 +333,15 @@ const kycPersonCollectiveCommander = async (user, msg, client, service) => {
               const pdfBase64Fiche = pdfBufferFiche.toString("base64");
               const pdfNameFiche = `${userData[phoneNumber].answers["name"]}_kyc`;
               const documentType = "application/pdf";
+              const content = `Faites un premier versement ici: https://goto.maviance.info/v1/qg3-sTUSR`;
+              await sendMessageToNumber(client,phoneNumber, content);
               await sendMediaToNumber(client, phoneNumber, documentType, pdfBase64Fiche, pdfNameFiche)
                   const pdfBase64FCP = pdfBufferFCP.toString("base64");
                   const pdfNameFCP = `${userData[phoneNumber].answers["name"]}_FCP`;
                   await sendMediaToNumber(client, phoneNumber, documentType, pdfBase64FCP, pdfNameFCP)
               for (const admin of listAdmin.users) {
                 try {
-                    const content = `Nouveau compte crée \n service : ${service} ,\n${userData[phoneNumber].answers["accountType"]} : ${userData[phoneNumber].answers["name"]},\nFaites un versement en cliquant ici: https://goto.maviance.info/v1/qg3-sTUSR \n\n consultez la fiche ci-joint.`;
+                    const content = `Nouveau compte crée pour le service : ${service} ,${userData[phoneNumber].answers["accountType"]} : ${userData[phoneNumber].answers["socialName"]} \n\n consultez la fiche ci-joint.`;
                     await sendMessageToNumber(client,admin.phoneNumber, content);
                     await sendMediaToNumber(client, admin.phoneNumber, documentType, pdfBase64Fiche, pdfNameFiche)
                     await sendMediaToNumber(client, admin.phoneNumber, documentType, pdfBase64FCP, pdfNameFCP)
