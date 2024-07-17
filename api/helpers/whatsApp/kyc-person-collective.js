@@ -333,8 +333,6 @@ const kycPersonCollectiveCommander = async (user, msg, client, service) => {
               const pdfBase64Fiche = pdfBufferFiche.toString("base64");
               const pdfNameFiche = `${userData[phoneNumber].answers["name"]}_kyc`;
               const documentType = "application/pdf";
-              const content = `Faites un premier versement ici: https://goto.maviance.info/v1/qg3-sTUSR`;
-              await sendMessageToNumber(client,phoneNumber, content);
               await sendMediaToNumber(client, phoneNumber, documentType, pdfBase64Fiche, pdfNameFiche)
                   const pdfBase64FCP = pdfBufferFCP.toString("base64");
                   const pdfNameFCP = `${userData[phoneNumber].answers["name"]}_FCP`;
@@ -495,7 +493,7 @@ const getCurrentStepMessage = (step) => {
     case 33:
       return "Finalisez votre inscription, Makeda Asset Management prendra rendez-vous avec vous par e-mail.\n\n saisir *Valider*";
     case 34:
-        return "Votre compte a été créé avec succès, l’un de nos conseillers prendra attache avec vous pour la suite.";
+        return `Votre compte a été créé avec succès, l’un de nos conseillers prendra attache avec vous pour la suite.\nFaites un premier versement ici: https://goto.maviance.info/v1/qg3-sTUSR`;
         default:
       return null;
   }
