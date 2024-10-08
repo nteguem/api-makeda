@@ -3,22 +3,22 @@ const AccountService = require('../../services/account.service');
 const { uploadToCloudinary } = require("../../services/uploadFile.service");
 const { sendMediaToNumber } = require("./whatsappMessaging");
 const { fillPdfFields } = require("../../services/fillFormPdf.service");
-const {list} = require("../../services/user.service")
+const { list } = require("../../services/user.service")
 const { getRandomDelay } = require("../../helpers/utils")
 const logger = require("../logger");
-const {ToWords} = require('to-words');
+const { ToWords } = require('to-words');
 
 const toWords = new ToWords({
-    localeCode: 'fr-FR',
-    converterOptions: {
-      currency: false,
-      ignoreDecimal: true,
-      ignoreZeroCurrency: true,
-    }
-  });
-  
+  localeCode: 'fr-FR',
+  converterOptions: {
+    currency: false,
+    ignoreDecimal: true,
+    ignoreZeroCurrency: true,
+  }
+});
+
 // Objet pour stocker l'étape actuelle et les réponses de l'utilisateur
-let userData ={};
+let userData = {};
 let countCase = 0;
 const pathTemplateKyc = "../../kyc-template/KYC Personne Physique.pdf"
 const pathFCP = "../../kyc-template/FCP Makeda Horizon Person.pdf"
@@ -31,15 +31,15 @@ const kycPersonCollectiveCommander = async (user, msg, client, service) => {
     if (!userData[phoneNumber]) {
       userData[phoneNumber] = {
         step: 1,
-        answers: {} 
+        answers: {}
       };
     }
-    const userInput = msg.body; 
+    const userInput = msg.body;
     userData[phoneNumber].answers["service"] = service;
     userData[phoneNumber].answers["user"] = user.data._id;
     userData[phoneNumber].answers["accountType"] = "personne_physique";
 
-    if (userInput === "*") { 
+    if (userInput === "*") {
       userData[phoneNumber].step = Math.max(userData[phoneNumber].step - 1, 1); // Ne pas descendre en dessous de l'étape 1
     }
     else {
@@ -60,10 +60,12 @@ const kycPersonCollectiveCommander = async (user, msg, client, service) => {
         case 3:
           const dateRegex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
           if (dateRegex.test(userInput.trim())) {
-              userData[phoneNumber].answers["dateOfBirth"] = userInput.trim();
-              userData[phoneNumber].step++;
+            const [day, month, year] = userInput.trim().split('/');
+            const formattedDate = new Date(`${year}-${month}-${day}`); 
+            userData[phoneNumber].answers["dateOfBirth"] = formattedDate;
+            userData[phoneNumber].step++;
           } else {
-              msg.reply("Veuillez entrer votre date de naissance au format dd/mm/yyyy (ex: 01/01/2000).");
+            msg.reply("Veuillez entrer votre date de naissance au format dd/mm/yyyy (ex: 01/01/2000).");
           }
           break;
         case 4:
@@ -77,33 +79,33 @@ const kycPersonCollectiveCommander = async (user, msg, client, service) => {
         case 6:
           const regexC = /^[A-Za-zÀ-ÖØ-öø-ÿ]+ *- *[A-Za-zÀ-ÖØ-öø-ÿ]+$/;
           if (regexC.test(userInput.trim())) {
-              const [country, city] = userInput.split('-');
-              userData[phoneNumber].answers["countryOfResidence"] = country.trim();
-              userData[phoneNumber].answers["cityOfResidence"] = city.trim();
-              userData[phoneNumber].step++;
+            const [country, city] = userInput.split('-');
+            userData[phoneNumber].answers["countryOfResidence"] = country.trim();
+            userData[phoneNumber].answers["cityOfResidence"] = city.trim();
+            userData[phoneNumber].step++;
           } else {
             msg.reply("Veuillez respecter le format [Pays-Ville].");
-          }       
+          }
           break;
         case 7:
           userData[phoneNumber].answers["profession"] = userInput;
           userData[phoneNumber].step++;
           break;
         case 8:
-            if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B" || userInput.toUpperCase() === "C" || userInput.toUpperCase() === "D" || userInput.toUpperCase() === "E" || userInput.toUpperCase() === "F" || userInput.toUpperCase() === "G" || userInput.toUpperCase() === "H") {
-              userData[phoneNumber].answers["typeProfession"] = userInput.toUpperCase() === "A" ? 'Fonctionnaire/Salarié du secteur public' :
-                userInput.toUpperCase() === "B" ? 'Etudiant' :
-                  userInput.toUpperCase() === "C" ? 'Planteur/Exploitant rural' :
-                    userInput.toUpperCase() === "D" ? 'Salarié du secteur privé' :
-                      userInput.toUpperCase() === "E" ? 'Commerçant et entrepreneur individuel' :
-                        userInput.toUpperCase() === "F" ? 'Agent d’organismes internationaux' :
-                          userInput.toUpperCase() === "G" ? 'Profession Libérale' :
-                            'Autre';
-              userData[phoneNumber].step++;
-            } else {
-              msg.reply("Veuillez choisir A, B, C, D, E, F, G ou H.");
-            }
-          break; 
+          if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B" || userInput.toUpperCase() === "C" || userInput.toUpperCase() === "D" || userInput.toUpperCase() === "E" || userInput.toUpperCase() === "F" || userInput.toUpperCase() === "G" || userInput.toUpperCase() === "H") {
+            userData[phoneNumber].answers["typeProfession"] = userInput.toUpperCase() === "A" ? 'Fonctionnaire/Salarié du secteur public' :
+              userInput.toUpperCase() === "B" ? 'Etudiant' :
+                userInput.toUpperCase() === "C" ? 'Planteur/Exploitant rural' :
+                  userInput.toUpperCase() === "D" ? 'Salarié du secteur privé' :
+                    userInput.toUpperCase() === "E" ? 'Commerçant et entrepreneur individuel' :
+                      userInput.toUpperCase() === "F" ? 'Agent d’organismes internationaux' :
+                        userInput.toUpperCase() === "G" ? 'Profession Libérale' :
+                          'Autre';
+            userData[phoneNumber].step++;
+          } else {
+            msg.reply("Veuillez choisir A, B, C, D, E, F, G ou H.");
+          }
+          break;
         case 9:
           userData[phoneNumber].answers["employerName"] = userInput;
           userData[phoneNumber].step++;
@@ -119,10 +121,10 @@ const kycPersonCollectiveCommander = async (user, msg, client, service) => {
         case 12:
           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
           if (emailRegex.test(userInput.trim())) {
-              userData[phoneNumber].answers["email"] = userInput.trim();
-              userData[phoneNumber].step++;
+            userData[phoneNumber].answers["email"] = userInput.trim();
+            userData[phoneNumber].step++;
           } else {
-              msg.reply("Veuillez entrer une adresse email valide (ex: exemple@domaine.com).");
+            msg.reply("Veuillez entrer une adresse email valide (ex: exemple@domaine.com).");
           }
           break;
         case 13:
@@ -156,7 +158,7 @@ const kycPersonCollectiveCommander = async (user, msg, client, service) => {
         case 15:
           userData[phoneNumber].answers["niu"] = userInput;
           userData[phoneNumber].step++;
-            break;
+          break;
         case 16:
           let regex = /^[^\s-]+(\s[^\s-]+)*-\d{9}$/;
           countCase = 1;
@@ -200,10 +202,10 @@ const kycPersonCollectiveCommander = async (user, msg, client, service) => {
             // Si l'utilisateur choisit une autre option, enregistrez simplement la réponse
             userData[phoneNumber].answers["financialMarketExperience"] = userInput.toUpperCase() === "A" ? "Oui" : "Non";
             userData[phoneNumber].step++;
-            countCase = 0; 
-        }  else {
-          msg.reply("Veuillez choisir A ou B.");
-        }
+            countCase = 0;
+          } else {
+            msg.reply("Veuillez choisir A ou B.");
+          }
           break;
         case 20:
           if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B" || userInput.toUpperCase() === "C") {
@@ -214,16 +216,16 @@ const kycPersonCollectiveCommander = async (user, msg, client, service) => {
           }
           break;
         case 21:
-          if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B" || userInput.toUpperCase() === "C"|| userInput.toUpperCase() === "D") {
-            userData[phoneNumber].answers["riskLevel"] = userInput.toUpperCase() === "A" ? "Très faible" : userInput.toUpperCase() === "B" ? "Faible": userInput.toUpperCase() === "C" ? "Moyen" : "Très élevé";
+          if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B" || userInput.toUpperCase() === "C" || userInput.toUpperCase() === "D") {
+            userData[phoneNumber].answers["riskLevel"] = userInput.toUpperCase() === "A" ? "Très faible" : userInput.toUpperCase() === "B" ? "Faible" : userInput.toUpperCase() === "C" ? "Moyen" : "Très élevé";
             userData[phoneNumber].step++;
           } else {
             msg.reply("Veuillez choisir A, B , C ou D.");
           }
           break;
         case 22:
-          if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B" || userInput.toUpperCase() === "C"|| userInput.toUpperCase() === "D") {
-            userData[phoneNumber].answers["financialSituationLastThreeYears"] = userInput.toUpperCase() === "A" ? "Difficile" : userInput.toUpperCase() === "B" ? "Stable": userInput.toUpperCase() === "C" ? "Bonne performance" : "Très bonne croissance";
+          if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B" || userInput.toUpperCase() === "C" || userInput.toUpperCase() === "D") {
+            userData[phoneNumber].answers["financialSituationLastThreeYears"] = userInput.toUpperCase() === "A" ? "Difficile" : userInput.toUpperCase() === "B" ? "Stable" : userInput.toUpperCase() === "C" ? "Bonne performance" : "Très bonne croissance";
             userData[phoneNumber].step++;
           } else {
             msg.reply("Veuillez choisir A, B , C ou D.");
@@ -278,55 +280,53 @@ const kycPersonCollectiveCommander = async (user, msg, client, service) => {
           }
           break;
         case 28:
-            if(userInput == "1")
-                {
-               userData[phoneNumber].answers["typeProductFCP"] = "FCP MAKEDA HORIZON"
-               userData[phoneNumber].step++;    
-                }
-             else
-             {
-             msg.reply("Veuillez choisir 1")
-             }
+          if (userInput == "1") {
+            userData[phoneNumber].answers["typeProductFCP"] = "FCP MAKEDA HORIZON"
+            userData[phoneNumber].step++;
+          }
+          else {
+            msg.reply("Veuillez choisir 1")
+          }
           break;
         case 29:
-            userData[phoneNumber].answers["initialAmountFCP"] = userInput;
-            userData[phoneNumber].answers["initialAmountLetterFCP"] = toWords.convert(userInput)+" FCFA";
-            userData[phoneNumber].step++; 
+          userData[phoneNumber].answers["initialAmountFCP"] = userInput;
+          userData[phoneNumber].answers["initialAmountLetterFCP"] = toWords.convert(userInput) + " FCFA";
+          userData[phoneNumber].step++;
           break;
         case 30:
-            if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B") {
-                userData[phoneNumber].answers["methodPaiementFCP"] =  userInput.toUpperCase() === "A" ? "Virement" : "Mobile money (OM|MOMO)";
-                userData[phoneNumber].step++; 
-            } else {
-                msg.reply("Veuillez choisir A, B");
-              }
+          if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B") {
+            userData[phoneNumber].answers["methodPaiementFCP"] = userInput.toUpperCase() === "A" ? "Virement" : "Mobile money (OM|MOMO)";
+            userData[phoneNumber].step++;
+          } else {
+            msg.reply("Veuillez choisir A, B");
+          }
           break;
         case 31:
-            if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B"|| userInput.toUpperCase() === "C"|| userInput.toUpperCase() === "D"|| userInput.toUpperCase() === "E") {
-                userData[phoneNumber].answers["frequenceFCP"] = 
-                userInput.toUpperCase() === "A" ? "Mensuelle" :
+          if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B" || userInput.toUpperCase() === "C" || userInput.toUpperCase() === "D" || userInput.toUpperCase() === "E") {
+            userData[phoneNumber].answers["frequenceFCP"] =
+              userInput.toUpperCase() === "A" ? "Mensuelle" :
                 userInput.toUpperCase() === "B" ? "Trimestrielle" :
-                userInput.toUpperCase() === "C" ? "Semestrielle" :
-                userInput.toUpperCase() === "D" ? "Annuelle" :
-                userInput.toUpperCase() === "E" ? "RAS" :
-                "";
-                userData[phoneNumber].step++;
-              } else {
-                msg.reply("Veuillez choisir A, B,C ou D");
-              }
+                  userInput.toUpperCase() === "C" ? "Semestrielle" :
+                    userInput.toUpperCase() === "D" ? "Annuelle" :
+                      userInput.toUpperCase() === "E" ? "RAS" :
+                        "";
+            userData[phoneNumber].step++;
+          } else {
+            msg.reply("Veuillez choisir A, B,C ou D");
+          }
           break;
         case 32:
-            userData[phoneNumber].answers["versementFCP"] = userInput;
-            userData[phoneNumber].step++;
+          userData[phoneNumber].answers["versementFCP"] = userInput;
+          userData[phoneNumber].step++;
           break;
         case 33:
           if (userInput == "Valider") {
             const pdfBufferFiche = await fillPdfFields(pathTemplateKyc, userData[phoneNumber].answers)
             const responseClodinaryFiche = await uploadToCloudinary(`${userData[phoneNumber].answers["name"]}_fiche`, pdfBufferFiche)
             userData[phoneNumber].answers["fiche"] = (responseClodinaryFiche);
-                const pdfBufferFCP = await fillPdfFields(pathFCP, userData[phoneNumber].answers)
-                const responseClodinaryFCP = await uploadToCloudinary(`${userData[phoneNumber].answers["name"]}_FCP Makeda Horizon`, pdfBufferFCP)
-                userData[phoneNumber].answers["FCP"] = (responseClodinaryFCP);
+            const pdfBufferFCP = await fillPdfFields(pathFCP, userData[phoneNumber].answers)
+            const responseClodinaryFCP = await uploadToCloudinary(`${userData[phoneNumber].answers["name"]}_FCP Makeda Horizon`, pdfBufferFCP)
+            userData[phoneNumber].answers["FCP"] = (responseClodinaryFCP);
             const response = await AccountService.createAccount(userData[phoneNumber].answers);
             if (response.success) {
               userData[phoneNumber].step++;
@@ -334,23 +334,23 @@ const kycPersonCollectiveCommander = async (user, msg, client, service) => {
               const pdfNameFiche = `${userData[phoneNumber].answers["name"]}_kyc`;
               const documentType = "application/pdf";
               await sendMediaToNumber(client, phoneNumber, documentType, pdfBase64Fiche, pdfNameFiche)
-                  const pdfBase64FCP = pdfBufferFCP.toString("base64");
-                  const pdfNameFCP = `${userData[phoneNumber].answers["name"]}_FCP`;
-                  await sendMediaToNumber(client, phoneNumber, documentType, pdfBase64FCP, pdfNameFCP)
+              const pdfBase64FCP = pdfBufferFCP.toString("base64");
+              const pdfNameFCP = `${userData[phoneNumber].answers["name"]}_FCP`;
+              await sendMediaToNumber(client, phoneNumber, documentType, pdfBase64FCP, pdfNameFCP)
               for (const admin of listAdmin.users) {
                 try {
-                    const content = `Nouveau compte crée pour le service : ${service} ,${userData[phoneNumber].answers["accountType"]} : ${userData[phoneNumber].answers["socialName"]} \n\n consultez la fiche ci-joint.`;
-                    await sendMessageToNumber(client,admin.phoneNumber, content);
-                    await sendMediaToNumber(client, admin.phoneNumber, documentType, pdfBase64Fiche, pdfNameFiche)
-                    await sendMediaToNumber(client, admin.phoneNumber, documentType, pdfBase64FCP, pdfNameFCP)
-                    const delay = getRandomDelay(5000, 15000);
-                    await new Promise(resolve => setTimeout(resolve, delay));
+                  const content = `Nouveau compte crée pour le service : ${service} ,${userData[phoneNumber].answers["accountType"]} : ${userData[phoneNumber].answers["socialName"]} \n\n consultez la fiche ci-joint.`;
+                  await sendMessageToNumber(client, admin.phoneNumber, content);
+                  await sendMediaToNumber(client, admin.phoneNumber, documentType, pdfBase64Fiche, pdfNameFiche)
+                  await sendMediaToNumber(client, admin.phoneNumber, documentType, pdfBase64FCP, pdfNameFCP)
+                  const delay = getRandomDelay(5000, 15000);
+                  await new Promise(resolve => setTimeout(resolve, delay));
                 } catch (error) {
                   logger(client).error(`Erreur lors de l'envoi ${admin.phoneNumber}`, error);
                 }
-            }
+              }
             } else {
-              console.log("response create account:",response)
+              console.log("response create account:", response)
               msg.reply(`echec creation du compte!`)
             }
           }
@@ -361,14 +361,13 @@ const kycPersonCollectiveCommander = async (user, msg, client, service) => {
         case 34:
           userData[phoneNumber] = { step: 1, answers: {} };
         default:
-          if(userData[phoneNumber].step == 34)
-            {
-              msg.reply(`_𝖳𝖺𝗉𝖾𝗓 # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._`)
-            }
-            else{
-              msg.reply("Étape inconnue.");
-            }
-          break; 
+          if (userData[phoneNumber].step == 34) {
+            msg.reply(`_𝖳𝖺𝗉𝖾𝗓 # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._`)
+          }
+          else {
+            msg.reply("Étape inconnue.");
+          }
+          break;
       }
     }
     // Envoyer le message correspondant à l'étape actuelle
@@ -376,11 +375,11 @@ const kycPersonCollectiveCommander = async (user, msg, client, service) => {
     if (currentStepMessage && countCase != 1) {
       const stepMessage = `é𝗍𝖺𝗉𝖾 ${userData[phoneNumber].step}/34\n\n${currentStepMessage}\n\n`;
       const additionalMessage = (userData[phoneNumber].step == 1 || userData[phoneNumber].step == 34 || userData[phoneNumber].step == 34) ?
-          "_𝖳𝖺𝗉𝖾𝗓  # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._" :
-          "_𝖳𝖺𝗉𝖾𝗓 * 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖾𝗇 𝖺𝗋𝗋𝗂è𝗋𝖾, # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._";
+        "_𝖳𝖺𝗉𝖾𝗓  # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._" :
+        "_𝖳𝖺𝗉𝖾𝗓 * 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖾𝗇 𝖺𝗋𝗋𝗂è𝗋𝖾, # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._";
       await sendMessageToNumber(client, phoneNumber, stepMessage + additionalMessage);
-  }
-  
+    }
+
   } catch (error) {
     logger(client).error("error", error);
     msg.reply(`Une erreur interne du serveur s'est produite suite à une action de l'utilisateur : ${user.data.pseudo}. Notre équipe y travaille.\n\nVeuillez taper # pour soumettre le formulaire ou * pour revenir en arrière.`);
@@ -390,34 +389,34 @@ const kycPersonCollectiveCommander = async (user, msg, client, service) => {
 // fonction pour verifier le document d'identité 
 function validateIdentity(msg) {
   const parts = msg.split('/');
-  
+
   if (parts.length !== 5) {
-      return "Le reponse n'est pas valide. Assurez-vous de suivre le format : A/Numéro/Délivré le/Lieu de délivrance/Date de validité";
+    return "Le reponse n'est pas valide. Assurez-vous de suivre le format : A/Numéro/Délivré le/Lieu de délivrance/Date de validité";
   }
 
   const [type, number, issuedDate, place, expiryDate] = parts;
 
   if (!['A', 'B', 'C'].includes(type)) {
-      return "Le type de document n'est pas valide. Il doit être A, B, ou C.";
+    return "Le type de document n'est pas valide. Il doit être A, B, ou C.";
   }
 
   const numberPattern = /^[a-zA-Z0-9]+$/;
   if (!numberPattern.test(number)) {
-      return "Le numéro de document n'est pas valide. Il doit être une chaîne de caractères alphanumérique.";
-  }  
+    return "Le numéro de document n'est pas valide. Il doit être une chaîne de caractères alphanumérique.";
+  }
 
   const datePattern = /^\d{2}-\d{2}-\d{4}$/;
   if (!datePattern.test(issuedDate)) {
-      return "La date de délivrance n'est pas valide. Utilisez le format jj-mm-aaaa.";
+    return "La date de délivrance n'est pas valide. Utilisez le format jj-mm-aaaa.";
   }
 
   if (!datePattern.test(expiryDate)) {
-      return "La date de validité n'est pas valide. Utilisez le format jj-mm-aaaa.";
+    return "La date de validité n'est pas valide. Utilisez le format jj-mm-aaaa.";
   }
 
   const placePattern = /^[a-zA-ZÀ-ÖØ-öø-ÿ\s]+$/;
   if (!placePattern.test(place)) {
-      return "Le lieu de délivrance n'est pas valide. Il doit être une chaîne de caractères alphabétiques.";
+    return "Le lieu de délivrance n'est pas valide. Il doit être une chaîne de caractères alphabétiques.";
   }
 
   return "identification valide";
@@ -487,14 +486,14 @@ const getCurrentStepMessage = (step) => {
     case 30:
       return `📋 *Quel est votre moyen de paiement ?* \n\n A-Virement \n B-Mobile money (OM|MOMO)`;
     case 31:
-      return `📋 *quel est votre fréquence de versement envisagée ?*  \n\n A-Mensuelle \n B-Trimestrielle \n C-Semestrielle \n D-Annuelle `; 
+      return `📋 *quel est votre fréquence de versement envisagée ?*  \n\n A-Mensuelle \n B-Trimestrielle \n C-Semestrielle \n D-Annuelle `;
     case 32:
-      return `quel est votre montant de versement selon votre fréquence envisagée  ? eg:10000 `; 
+      return `quel est votre montant de versement selon votre fréquence envisagée  ? eg:10000 `;
     case 33:
       return "Finalisez votre inscription, Makeda Asset Management prendra rendez-vous avec vous par e-mail.\n\n saisir *Valider*";
     case 34:
-        return `Votre compte a été créé avec succès, l’un de nos conseillers prendra attache avec vous pour la suite.\nFaites votre premier versement ici: https://goto.maviance.info/v1/qg3-sTUSR`;
-        default:
+      return `Votre compte a été créé avec succès, l’un de nos conseillers prendra attache avec vous pour la suite.\nFaites votre premier versement ici: https://goto.maviance.info/v1/qg3-sTUSR`;
+    default:
       return null;
   }
 };

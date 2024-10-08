@@ -49,10 +49,12 @@ const kycPersonCommander = async (user, msg, client, service) => {
         case 3:
           const dateRegex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
           if (dateRegex.test(userInput.trim())) {
-              userData[phoneNumber].answers["dateOfBirth"] = userInput.trim();
-              userData[phoneNumber].step++;
+            const [day, month, year] = userInput.trim().split('/');
+            const formattedDate = new Date(`${year}-${month}-${day}`); 
+            userData[phoneNumber].answers["dateOfBirth"] = formattedDate;
+            userData[phoneNumber].step++;
           } else {
-              msg.reply("Veuillez entrer votre date de naissance au format dd/mm/yyyy (ex: 01/01/2000).");
+            msg.reply("Veuillez entrer votre date de naissance au format dd/mm/yyyy (ex: 01/01/2000).");
           }
           break;
         case 4:
@@ -65,7 +67,7 @@ const kycPersonCommander = async (user, msg, client, service) => {
           break;
         case 6:
           const regexC = /^[A-Za-zÀ-ÖØ-öø-ÿ]+ *- *[A-Za-zÀ-ÖØ-öø-ÿ]+$/;
-        if (regexC.test(userInput.trim())) {
+          if (regexC.test(userInput.trim())) {
             const [country, city] = userInput.split('-');
             userData[phoneNumber].answers["countryOfResidence"] = country.trim();
             userData[phoneNumber].answers["cityOfResidence"] = city.trim();
@@ -108,10 +110,10 @@ const kycPersonCommander = async (user, msg, client, service) => {
         case 12:
           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
           if (emailRegex.test(userInput.trim())) {
-              userData[phoneNumber].answers["email"] = userInput.trim();
-              userData[phoneNumber].step++;
+            userData[phoneNumber].answers["email"] = userInput.trim();
+            userData[phoneNumber].step++;
           } else {
-              msg.reply("Veuillez entrer une adresse email valide (ex: exemple@domaine.com).");
+            msg.reply("Veuillez entrer une adresse email valide (ex: exemple@domaine.com).");
           }
           break;
         case 13:
@@ -186,11 +188,11 @@ const kycPersonCommander = async (user, msg, client, service) => {
           break;
         case 19:
           if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B") {
-              // Si l'utilisateur choisit une autre option, enregistrez simplement la réponse
-              userData[phoneNumber].answers["financialMarketExperience"] = userInput.toUpperCase() === "A" ? "Oui" : "Non";
-              userData[phoneNumber].step++;
-              countCase = 0; 
-          }  else {
+            // Si l'utilisateur choisit une autre option, enregistrez simplement la réponse
+            userData[phoneNumber].answers["financialMarketExperience"] = userInput.toUpperCase() === "A" ? "Oui" : "Non";
+            userData[phoneNumber].step++;
+            countCase = 0;
+          } else {
             msg.reply("Veuillez choisir A ou B.");
           }
           break;
@@ -203,16 +205,16 @@ const kycPersonCommander = async (user, msg, client, service) => {
           }
           break;
         case 21:
-          if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B" || userInput.toUpperCase() === "C"|| userInput.toUpperCase() === "D") {
-            userData[phoneNumber].answers["riskLevel"] = userInput.toUpperCase() === "A" ? "Très faible" : userInput.toUpperCase() === "B" ? "Faible": userInput.toUpperCase() === "C" ? "Moyen" : "Très élevé";
+          if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B" || userInput.toUpperCase() === "C" || userInput.toUpperCase() === "D") {
+            userData[phoneNumber].answers["riskLevel"] = userInput.toUpperCase() === "A" ? "Très faible" : userInput.toUpperCase() === "B" ? "Faible" : userInput.toUpperCase() === "C" ? "Moyen" : "Très élevé";
             userData[phoneNumber].step++;
           } else {
             msg.reply("Veuillez choisir A, B , C ou D.");
           }
           break;
         case 22:
-          if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B" || userInput.toUpperCase() === "C"|| userInput.toUpperCase() === "D") {
-            userData[phoneNumber].answers["financialSituationLastThreeYears"] = userInput.toUpperCase() === "A" ? "Difficile" : userInput.toUpperCase() === "B" ? "Stable": userInput.toUpperCase() === "C" ? "Bonne performance" : "Très bonne croissance";
+          if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B" || userInput.toUpperCase() === "C" || userInput.toUpperCase() === "D") {
+            userData[phoneNumber].answers["financialSituationLastThreeYears"] = userInput.toUpperCase() === "A" ? "Difficile" : userInput.toUpperCase() === "B" ? "Stable" : userInput.toUpperCase() === "C" ? "Bonne performance" : "Très bonne croissance";
             userData[phoneNumber].step++;
           } else {
             msg.reply("Veuillez choisir A, B , C ou D.");
