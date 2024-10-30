@@ -41,7 +41,7 @@ async function deleteGroup(groupId,client) {
   }
 }
 
-async function listGroups(client) {
+async function listGroups(client, limit = 10, offset = 0) {
   try {
     const groups = await Group.aggregate([
       {
@@ -56,17 +56,22 @@ async function listGroups(client) {
         $project: {
           name: 1,
           description: 1,
-          memberCount: { $size: "$members" } 
+          memberCount: { $size: "$members" }
         }
-      }
+      },
+      { $skip: offset },
+      { $limit: limit }
     ]);
 
-    return { success: true, groups };
+    const total = await Group.countDocuments();
+
+    return { success: true, total, groups };
   } catch (error) {
     logger(client).error('Error list group:', error);
     return { success: false, error: error.message };
   }
 }
+
 
 
 

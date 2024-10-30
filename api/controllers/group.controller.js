@@ -41,29 +41,35 @@ async function deleteGroup(req, res,client) {
   }
 }
 
-async function listGroups(req, res,client) {
-    const groupId = req.query.id;
-    if (groupId) {
-      try {
-        const response = await GroupService.getUsersInGroup(groupId,client);
-        if (response.success) {
-          return ResponseService.success(res, { users: response.users, groupName: response.groupName });
-        } else {
-          return ResponseService.internalServerError(res, { error: response.error });
-        }
-      } catch (error) {
-        console.error('Error getting users in group:', error);
-        return ResponseService.internalServerError(res, { error: 'Error getting users in group' });
-      }
-    } else {
-      const response = await GroupService.listGroups(client);
+async function listGroups(req, res, client) {
+  const groupId = req.query.id;
+  if (groupId) {
+    // Si un `groupId` est fourni, on obtient les utilisateurs dans ce groupe
+    try {
+      const response = await GroupService.getUsersInGroup(groupId, client);
       if (response.success) {
-        return ResponseService.success(res, { groups: response.groups });
+        return ResponseService.success(res, { users: response.users, groupName: response.groupName });
       } else {
         return ResponseService.internalServerError(res, { error: response.error });
       }
+    } catch (error) {
+      console.error('Error getting users in group:', error);
+      return ResponseService.internalServerError(res, { error: 'Error getting users in group' });
+    }
+  } else {
+    // Pagination pour la liste des groupes
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = parseInt(req.query.offset) || 0;
+    
+    const response = await GroupService.listGroups(client, limit, offset);
+    if (response.success) {
+      return ResponseService.success(res, { groups: response.groups, total: response.total });
+    } else {
+      return ResponseService.internalServerError(res, { error: response.error });
     }
   }
+}
+
 
 async function generateAndDownloadCSV(req, res) {
     const {id} = req.query
