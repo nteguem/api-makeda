@@ -109,7 +109,7 @@ async function listAccounts(service, phoneNumber, client, limit = 10, offset = 0
   
       // Calculer le total des comptes correspondant à la requête
       const total = await Account.countDocuments(query);
-  
+      
       return {
         success: true,
         accounts,
