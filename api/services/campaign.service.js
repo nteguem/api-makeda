@@ -65,20 +65,31 @@ async function deleteCampaign(campaignId, client) {
   }
 }
 
-async function listCampaigns(data,client) {
+async function listCampaigns(data, client) {
   try {
-    const { type } = data;
+    const { type, limit = 10, offset = 0 } = data;
     let query = {};
+    
     if (type) {
-      query = { type };
+      query.type = type;
     }
-    const campaigns = await Campaign.find(query, {__v:0 }).populate({ path: 'groups', select: '-members -__v' });
-    return { success: true, campaigns };
+    
+    // Récupérer les campagnes avec pagination
+    const campaigns = await Campaign.find(query, { __v: 0 })
+      .populate({ path: 'groups', select: '-members -__v' })
+      .skip(offset)
+      .limit(limit);
+
+    // Calculer le nombre total de campagnes correspondant au filtre
+    const total = await Campaign.countDocuments(query);
+
+    return { success: true, campaigns, total };
   } catch (error) {
     logger(client).error('Error list campaigns:', error);
     return { success: false, error: error.message };
   }
 }
+
 
 async function updateCampaignTasks(client) {
     await scheduleCampaignTasks("stop");

@@ -41,9 +41,14 @@ async function deleteCampaign(req, res, client) {
 }
 
 async function listCampaigns(req, res, client) {
-  const response = await ServiceCampaign.listCampaigns(req.query, client);
+  const limit = parseInt(req.query.limit) || 10;
+  const offset = parseInt(req.query.offset) || 0;
+  const type = req.query.type;
+
+  const response = await ServiceCampaign.listCampaigns({ type, limit, offset }, client);
+
   if (response.success) {
-    return ResponseService.success(res, { campaigns: response.campaigns });
+    return ResponseService.success(res, { campaigns: response.campaigns, total: response.total });
   } else {
     return ResponseService.internalServerError(res, { error: response.error });
   }

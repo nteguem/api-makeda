@@ -81,53 +81,57 @@ async function deleteAccount(accountId,client) {
     }
 }
 
-async function listAccounts(service, phoneNumber,client) {
+async function listAccounts(service, phoneNumber, client, limit = 10, offset = 0) {
     try {
-        let query = {};
-        if (service) {
-            query.service = service;
-        }
-
-        if (phoneNumber) {
-            const user = await User.findOne({ phoneNumber });
-            if (user) {
-                query.user = user._id;
-            } else {
-                return {
-                    success: true,
-                    accounts: [],
-                    totals: {
-                        totalAccounts: 0,
-                        totalVerified: 0,
-                        totalPending: 0,
-                        totalRejected: 0
-                    }
-                };
-            }
-        }
-
-        const accounts = await Account.find(query).populate('user');
-
-        const totalAccounts = accounts.length;
-        const totalVerified = accounts.filter(account => account.verified === 'approved').length;
-        const totalPending = accounts.filter(account => account.verified === 'pending').length;
-        const totalRejected = accounts.filter(account => account.verified === 'rejected').length;
-
-        return {
+      let query = {};
+  
+      if (service) {
+        query.service = service;
+      }
+  
+      if (phoneNumber) {
+        const user = await User.findOne({ phoneNumber });
+        if (user) {
+          query.user = user._id;
+        } else {
+          return {
             success: true,
-            accounts,
+            accounts: [],
             totals: {
-                totalAccounts,
-                totalVerified,
-                totalPending,
-                totalRejected
+              totalAccounts: 0,
+              totalVerified: 0,
+              totalPending: 0,
+              totalRejected: 0
             }
-        };
+          };
+        }
+      }
+  
+      // Récupérer les comptes avec pagination
+      const accounts = await Account.find(query).populate('user').skip(offset).limit(limit);
+  
+      // Calculer les totaux
+      const totalAccounts = await Account.countDocuments(query);
+      const totalVerified = await Account.countDocuments({ ...query, verified: 'approved' });
+      const totalPending = await Account.countDocuments({ ...query, verified: 'pending' });
+      const totalRejected = await Account.countDocuments({ ...query, verified: 'rejected' });
+  
+      return {
+        success: true,
+        accounts,
+        totals: {
+          totalAccounts,
+          totalVerified,
+          totalPending,
+          totalRejected
+        }
+      };
     } catch (error) {
-        logger(client).error('Error listAccounts:', error);
-        return { success: false, error: error.message };
+      logger(client).error('Error listAccounts:', error);
+      return { success: false, error: error.message };
     }
-}
+  }
+  
 
 
 module.exports = {
