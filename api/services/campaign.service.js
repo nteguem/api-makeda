@@ -1,6 +1,6 @@
 const Campaign = require('../models/campaign.model');
 const cron = require('node-cron');
-const {sendMessageToNumber,sendMediaToNumber} = require('../views/whatsapp/whatsappMessaging')
+const {sendMessageToNumber,sendMediaToNumber} = require('../views/whatsApp/whatsappMessaging')
 const {list} = require('./user.service')
 const { getRandomDelay } = require("../helpers/utils")
 const {getUsersInGroup} = require("./group.service")

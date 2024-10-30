@@ -2,7 +2,7 @@ const winston = require('winston');
 const { format } = winston;
 const fs = require('fs');
 const path = require('path');
-const { sendMessageToNumber } = require("../views/whatsapp/whatsappMessaging");
+const { sendMessageToNumber } = require("../views/whatsApp/whatsappMessaging");
 
 const logDirectory = './api/logging';
 

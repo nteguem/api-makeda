@@ -2,7 +2,7 @@ const Account = require('../models/account.model');
 const User = require('../models/user.model');
 const { DefaultGroupNames } = require("../data/defaultGroups");
 const {addUserToGroupByPhoneNumber} = require("./group.service")
-const {sendMessageToNumber} = require('../views/whatsapp/whatsappMessaging')
+const {sendMessageToNumber} = require('../views/whatsApp/whatsappMessaging')
 const logger = require("../helpers/logger")
 
 async function createAccount(accountData,client) {
