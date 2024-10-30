@@ -84,11 +84,13 @@ async function deleteAccount(accountId,client) {
 async function listAccounts(service, phoneNumber, client, limit = 10, offset = 0) {
     try {
       let query = {};
-  
+      
+      // Appliquer le filtre par service
       if (service) {
         query.service = service;
       }
-  
+      
+      // Appliquer le filtre par numéro de téléphone
       if (phoneNumber) {
         const user = await User.findOne({ phoneNumber });
         if (user) {
@@ -97,12 +99,7 @@ async function listAccounts(service, phoneNumber, client, limit = 10, offset = 0
           return {
             success: true,
             accounts: [],
-            totals: {
-              totalAccounts: 0,
-              totalVerified: 0,
-              totalPending: 0,
-              totalRejected: 0
-            }
+            total: 0 // Total égal à 0 si aucun utilisateur n'est trouvé
           };
         }
       }
@@ -110,27 +107,20 @@ async function listAccounts(service, phoneNumber, client, limit = 10, offset = 0
       // Récupérer les comptes avec pagination
       const accounts = await Account.find(query).populate('user').skip(offset).limit(limit);
   
-      // Calculer les totaux
-      const totalAccounts = await Account.countDocuments(query);
-      const totalVerified = await Account.countDocuments({ ...query, verified: 'approved' });
-      const totalPending = await Account.countDocuments({ ...query, verified: 'pending' });
-      const totalRejected = await Account.countDocuments({ ...query, verified: 'rejected' });
+      // Calculer le total des comptes correspondant à la requête
+      const total = await Account.countDocuments(query);
   
       return {
         success: true,
         accounts,
-        totals: {
-          totalAccounts,
-          totalVerified,
-          totalPending,
-          totalRejected
-        }
+        total // Retourner seulement le total
       };
     } catch (error) {
       logger(client).error('Error listAccounts:', error);
       return { success: false, error: error.message };
     }
   }
+  
   
 
 
