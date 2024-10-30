@@ -12,7 +12,7 @@ const { initializeWhatsAppClient, handleIncomingMessages } = require('./api/view
 const {scheduleCampaignTasks} = require("./api/services/campaign.service")
 const {ensureDefaultGroupsExist} = require("./api/services/group.service")
 // Connection to MongoDB
-dbConnect(); 
+dbConnect();   
 // App initialization
 const app = express();
 const server = http.createServer(app);
