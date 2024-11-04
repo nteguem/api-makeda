@@ -121,6 +121,56 @@ async function listAccounts(service, phoneNumber, client, limit = 10, offset = 0
     }
   }
   
+  async function statsAccounts(service, phoneNumber, client, limit = 10, offset = 0) {
+    try {
+      let query = {};
+  
+      if (service) {
+        query.service = service;
+      }
+  
+      if (phoneNumber) {
+        const user = await User.findOne({ phoneNumber });
+        if (user) {
+          query.user = user._id;
+        } else {
+          return {
+            success: true,
+            accounts: [],
+            totals: {
+              totalAccounts: 0,
+              totalVerified: 0,
+              totalPending: 0,
+              totalRejected: 0
+            }
+          };
+        }
+      }
+  
+      // Récupérer les comptes avec pagination
+      const accounts = await Account.find(query).populate('user').skip(offset).limit(limit);
+  
+      // Calculer les totaux
+      const totalAccounts = await Account.countDocuments(query);
+      const totalVerified = await Account.countDocuments({ ...query, verified: 'approved' });
+      const totalPending = await Account.countDocuments({ ...query, verified: 'pending' });
+      const totalRejected = await Account.countDocuments({ ...query, verified: 'rejected' });
+  
+      return {
+        success: true,
+        accounts,
+        totals: {
+          totalAccounts,
+          totalVerified,
+          totalPending,
+          totalRejected
+        }
+      };
+    } catch (error) {
+      logger(client).error('Error listAccounts:', error);
+      return { success: false, error: error.message };
+    }
+  }
   
 
 
@@ -128,5 +178,6 @@ module.exports = {
     createAccount,
     updateAccount,
     deleteAccount,
-    listAccounts
+    listAccounts,
+    statsAccounts
 };

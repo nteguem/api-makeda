@@ -14,6 +14,10 @@ const setupAccount = (app, client) => {
         accountHandler.listAccounts(req, res, client);
     });
 
+    router.get('/stats', (req, res) => {
+        accountHandler.statsAccounts(req, res, client);
+    });
+
     router.post('/add', (req, res) => {
         accountHandler.createAccount(req, res, client);
     });
