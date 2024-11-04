@@ -81,45 +81,52 @@ async function deleteAccount(accountId,client) {
     }
 }
 
-async function listAccounts(service, phoneNumber, client, limit = 10, offset = 0) {
-    try {
+async function listAccounts(service, phoneNumber, client, limit = 10, offset = 0, verified) {
+  try {
       let query = {};
-      
-      // Appliquer le filtre par service
+
+      // Apply service filter
       if (service) {
-        query.service = service;
+          query.service = service;
       }
-      
-      // Appliquer le filtre par numéro de téléphone
+
+      // Apply phone number filter
       if (phoneNumber) {
-        const user = await User.findOne({ phoneNumber });
-        if (user) {
-          query.user = user._id;
-        } else {
-          return {
-            success: true,
-            accounts: [],
-            total: 0 // Total égal à 0 si aucun utilisateur n'est trouvé
-          };
-        }
+          const user = await User.findOne({ phoneNumber });
+          if (user) {
+              query.user = user._id;
+          } else {
+              return {
+                  success: true,
+                  accounts: [],
+                  total: 0 // Total is 0 if no user is found
+              };
+          }
       }
-  
-      // Récupérer les comptes avec pagination
+
+      // Apply "verified" status filter
+      if (verified) {
+          query.verified = verified;
+      }
+
+      // Retrieve accounts with pagination
       const accounts = await Account.find(query).populate('user').skip(offset).limit(limit);
-  
-      // Calculer le total des comptes correspondant à la requête
+
+      // Calculate the total number of matching accounts
       const total = await Account.countDocuments(query);
-      
+
       return {
-        success: true,
-        accounts,
-        total // Retourner seulement le total
+          success: true,
+          accounts,
+          total
       };
-    } catch (error) {
-      logger(client).error('Error listAccounts:', error);
+  } catch (error) {
+      logger(client).error('Error in listAccounts:', error);
       return { success: false, error: error.message };
-    }
   }
+}
+
+
   
   async function statsAccounts(service, phoneNumber, client, limit = 10, offset = 0) {
     try {
