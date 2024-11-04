@@ -3,9 +3,10 @@ const logger = require('../../helpers/logger');
 const { sendMessageToNumber } = require('./whatsappMessaging');
 const { kycPersonCommander } = require('./kyc-person');
 const { kycEnterpriseCommander } = require('./kyc-enterprise');
-const {kycPersonCollectiveCommander} = require("./kyc-person-collective");
-const {kycEnterpriseCollectiveCommander} = require("./kyc-enterprise-collective");
+const { kycPersonCollectiveCommander } = require("./kyc-person-collective");
+const { kycEnterpriseCollectiveCommander } = require("./kyc-enterprise-collective");
 const { listAccounts } = require("../../services/account.service");
+const {createPaymentIntent} = require("../../services/paymentIntent.service")
 const { GainSimulationCommander } = require("./simulator")
 let Steps = {};
 
@@ -13,6 +14,8 @@ const UserCommander = async (user, msg, client) => {
   try {
     const Menu = menuData(user.data.pseudo, user.exist);
     const listAccount = (await listAccounts(null, user.data.phoneNumber)).accounts;
+    const approvedAccounts = listAccount.filter(item => item.verified === 'approved');
+    const pendingAccounts = listAccount.filter(item => item.verified === 'pending');
     if (!('participant' in msg.id)) {
       if (!Steps[msg.from]) {
         Steps[msg.from] = {};
@@ -55,7 +58,7 @@ const UserCommander = async (user, msg, client) => {
                 if (item.accountType === 'personne_morale') {
                   result += `${count}. ${item.socialName} (personne morale)\n`;
                 } else if (item.accountType === 'personne_physique') {
-                  result += `${count}. ${item.name} ${item.firstName} (personne physique)\n`;
+                  result += `${count}. ${item.name}  (personne physique)\n`;
                 }
                 count++;
               });
@@ -65,10 +68,40 @@ const UserCommander = async (user, msg, client) => {
               Steps[msg.from]["currentMenu"] = "myAccountMenu";
               break;
             case "7":
-                Steps[msg.from]["isSubMenu"] = true;
-                msg.reply(`Cliquez ici pour faire un versement : https://goto.maviance.info/v1/qg3-sTUSR \n\n _Tapez # pour revenir au menu principal_`);
-                Steps[msg.from]["currentMenu"] = "versementMenu";
-                break;
+              let resultVersement = '';
+              let countVersement = 1;
+              // Add approved services to the list
+              if (approvedAccounts.length > 0) {
+                resultVersement += '*📋 Veuillez choisir le service pour lequel vous souhaitez faire un versement* : \n\n';
+                approvedAccounts.forEach(item => {
+                  resultVersement += `${countVersement}. ${item.socialName || item.name}, Tapez ${countVersement}\n`;
+                  countVersement++;
+                });
+              }
+              // Add pending services with a title if there are pending accounts
+              if (pendingAccounts.length > 0) {
+                if (pendingAccounts.length > 0) {
+                  resultVersement += `\n*Services en attente de validation par l'équipe Makeda :* \n\n`;
+                }
+                pendingAccounts.forEach(item => {
+                  resultVersement += `- ${item.socialName || item.name}\n`;
+                });
+
+                // Message indicating when the user can make a deposit for pending services
+                const pendingMessage = pendingAccounts.length === 1
+                  ? `\nVous pourrez faire un versement dès qu'il sera approuvé.`
+                  : `\nVous pourrez faire un versement dès qu'ils seront approuvés.`;
+
+                resultVersement += pendingMessage;
+              }
+              // If there are no approved or pending accounts, display an alternative message
+              const contentVersement = approvedAccounts.length === 0 && pendingAccounts.length === 0
+                ? `Vous n'avez pas encore souscrit à un service pour effectuer un versement. Pour le faire, tapez 3 dans le menu principal.`
+                : resultVersement;
+              msg.reply(`${contentVersement} \n\n_Tapez # pour revenir au menu principal_`);
+              Steps[msg.from]["currentMenu"] = "versementMenu";
+              Steps[msg.from]["isSubMenu"] = true;
+              break;
             case "#":
               Steps[msg.from]["currentMenu"] = "mainMenu";
               Steps[msg.from]["isSubMenu"] = true;
@@ -125,25 +158,21 @@ const UserCommander = async (user, msg, client) => {
           switch (msg.body) {
             case "1":
               (Steps[msg.from]["currentMenu"] = "personMenu");
-              if(Steps[msg.from]["addAccount"]["service"] ===  "Gestion Collective")
-                {
-                  await sendMessageToNumber(client, user.data.phoneNumber, `é𝗍𝖺𝗉𝖾 1/34\n\nVeuillez saisir votre nom et prénom.\n\n_𝖳𝖺𝗉𝖾𝗓 # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._`);
-                }
-                else
-                {
-                  await sendMessageToNumber(client, user.data.phoneNumber, `é𝗍𝖺𝗉𝖾 1/29\n\nVeuillez saisir votre nom et prénom.\n\n_𝖳𝖺𝗉𝖾𝗓 # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._`);
-                }
+              if (Steps[msg.from]["addAccount"]["service"] === "Gestion Collective") {
+                await sendMessageToNumber(client, user.data.phoneNumber, `é𝗍𝖺𝗉𝖾 1/34\n\nVeuillez saisir votre nom et prénom.\n\n_𝖳𝖺𝗉𝖾𝗓 # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._`);
+              }
+              else {
+                await sendMessageToNumber(client, user.data.phoneNumber, `é𝗍𝖺𝗉𝖾 1/29\n\nVeuillez saisir votre nom et prénom.\n\n_𝖳𝖺𝗉𝖾𝗓 # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._`);
+              }
               break;
             case "2":
               (Steps[msg.from]["currentMenu"] = "enterpriseMenu");
-              if(Steps[msg.from]["addAccount"]["service"] ===  "Gestion Collective")
-                {
-                  await sendMessageToNumber(client, user.data.phoneNumber, `é𝗍𝖺𝗉𝖾 1/32\n\nVeuillez saisir votre Dénomination sociale.\n\n_𝖳𝖺𝗉𝖾𝗓 # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._`);
-                }
-                else
-                {
-                  await sendMessageToNumber(client, user.data.phoneNumber, `é𝗍𝖺𝗉𝖾 1/27\n\nVeuillez saisir votre Dénomination sociale.\n\n_𝖳𝖺𝗉𝖾𝗓 # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._`);
-                }
+              if (Steps[msg.from]["addAccount"]["service"] === "Gestion Collective") {
+                await sendMessageToNumber(client, user.data.phoneNumber, `é𝗍𝖺𝗉𝖾 1/32\n\nVeuillez saisir votre Dénomination sociale.\n\n_𝖳𝖺𝗉𝖾𝗓 # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._`);
+              }
+              else {
+                await sendMessageToNumber(client, user.data.phoneNumber, `é𝗍𝖺𝗉𝖾 1/27\n\nVeuillez saisir votre Dénomination sociale.\n\n_𝖳𝖺𝗉𝖾𝗓 # 𝗉𝗈𝗎𝗋 𝗋𝖾𝗏𝖾𝗇𝗂𝗋 𝖺𝗎 𝗆𝖾𝗇𝗎 𝗉𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅._`);
+              }
               break;
           }
           break;
@@ -154,14 +183,12 @@ const UserCommander = async (user, msg, client) => {
             Steps[msg.from]["isSubMenu"] = true;
             await sendMessageToNumber(client, user.data.phoneNumber, Menu);
           } else {
-            if(Steps[msg.from]["addAccount"]["service"] ===  "Gestion Collective")
-              {
-                await kycPersonCollectiveCommander(user, msg, client, Steps[msg.from]["addAccount"]["service"]);
-              }
-              else
-              {
-                await kycPersonCommander(user, msg, client, Steps[msg.from]["addAccount"]["service"]);
-              }
+            if (Steps[msg.from]["addAccount"]["service"] === "Gestion Collective") {
+              await kycPersonCollectiveCommander(user, msg, client, Steps[msg.from]["addAccount"]["service"]);
+            }
+            else {
+              await kycPersonCommander(user, msg, client, Steps[msg.from]["addAccount"]["service"]);
+            }
           }
           break;
         case "enterpriseMenu":
@@ -170,14 +197,12 @@ const UserCommander = async (user, msg, client) => {
             Steps[msg.from]["isSubMenu"] = true;
             await sendMessageToNumber(client, user.data.phoneNumber, Menu);
           } else {
-            if(Steps[msg.from]["addAccount"]["service"] ===  "Gestion Collective")
-              {
-                await kycEnterpriseCollectiveCommander(user, msg, client, Steps[msg.from]["addAccount"]["service"]);
-              }
-              else
-              {
-                await kycEnterpriseCommander(user, msg, client, Steps[msg.from]["addAccount"]["service"]);
-              }
+            if (Steps[msg.from]["addAccount"]["service"] === "Gestion Collective") {
+              await kycEnterpriseCollectiveCommander(user, msg, client, Steps[msg.from]["addAccount"]["service"]);
+            }
+            else {
+              await kycEnterpriseCommander(user, msg, client, Steps[msg.from]["addAccount"]["service"]);
+            }
           }
           break;
         case "simulateGainMenu":
@@ -189,6 +214,39 @@ const UserCommander = async (user, msg, client) => {
             await GainSimulationCommander(user, msg, client);
           }
           break;
+          case "versementMenu":
+            if (Steps[msg.from]["currentMenu"] === "versementMenu") {
+                const selectedIndex = parseInt(msg.body.trim()) - 1;
+                if (!isNaN(selectedIndex) && selectedIndex >= 0 && selectedIndex < approvedAccounts.length) {
+                    const selectedAccount = approvedAccounts[selectedIndex];
+                    const accountDetails = [
+                        { label: 'Nom', value: selectedAccount.socialName || selectedAccount.name },
+                        { label: 'Service', value: selectedAccount.service },
+                        { label: 'Type compte', value: selectedAccount.accountType },
+                        { label: 'Type produit', value: selectedAccount.typeProductFCP },
+                        { label: 'Montant initial', value: selectedAccount.initialAmountFCP },
+                        { label: 'Frequence FCP', value: selectedAccount.frequenceFCP },
+                        { label: 'Versement FCP', value: selectedAccount.versementFCP }
+                    ];
+                    const accountDetailsMessage = accountDetails
+                        .filter(detail => detail.value) 
+                        .map(detail => `*${detail.label} :* ${detail.value}`)
+                        .join('\n');
+        
+                    const paymentLinkMessage = `\n\nCliquez ici pour faire un versement : https://goto.maviance.info/v1/qg3-sTUSR \n\n_Tapez # pour revenir au menu principal_`;
+                    msg.reply(`Détails du compte sélectionné :\n\n${accountDetailsMessage}${paymentLinkMessage}`);
+                   const versement =  await createPaymentIntent({
+                      "account": selectedAccount.id,  
+                      "description": `demande de versement pour le service  ${selectedAccount.service} au nom de ${selectedAccount.socialName || selectedAccount.name}`
+                    },client)
+
+                } else {
+                    msg.reply(`Numéro de compte invalide. Veuillez entrer un numéro de compte valide pour afficher les détails.\n\n_Tapez # pour revenir au menu principal_`);
+                }
+            }
+            break;
+        
+
         default:
           Steps[msg.from]["currentMenu"] = "mainMenu";
           Steps[msg.from]["isSubMenu"] = true;

@@ -9,6 +9,7 @@ const {setupCampaign} = require('./campaign.route');
 const {setupGroup} = require('./group.route')
 const {setupAccount} = require('./account.route')
 const {setupUpload} = require('./upload.route')
+const {setupPaymentIntent} = require("./paymentIntent.route")
 /* GET home page. */
 // Define a route for the home page ('/') that renders the 'index' template with the title 'Bibemella'.
 router.get('/', function(req, res, next) {
@@ -29,6 +30,7 @@ const setupAppRoutes = (client) => {
   setupGroup(app,client);
   setupAccount(app,client);
   setupUpload(app);
+  setupPaymentIntent(app,client);
   return app;
 }
 
