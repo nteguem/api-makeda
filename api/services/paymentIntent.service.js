@@ -50,7 +50,7 @@ async function listPaymentIntents(service, client, limit = 10, offset = 0) {
             query.service = service;
         }
 
-        const paymentIntents = await PaymentIntent.find(query).skip(offset).limit(limit);
+        const paymentIntents = await PaymentIntent.find(query).populate('account').skip(offset).limit(limit);
         const total = await PaymentIntent.countDocuments(query);
 
         return { success: true, paymentIntents, total };
