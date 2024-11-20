@@ -109,7 +109,7 @@ const AdminCommander = async (user, msg, client) => {
             const media = await msg.downloadMedia();
             const nameMedia = `${user.data.phoneNumber}_${name}`
             const bufferData = await Buffer.from(media.data, 'base64');
-            const responseClodinary = await uploadToCloudinary(`${nameMedia}`, git )
+            const responseClodinary = await uploadToCloudinary(`${nameMedia}`, bufferData )
             description = {hasMedia:true,content:responseClodinary} ;
             await sendMediaToNumber(client,user.data.phoneNumber, media.mimetype, bufferData.toString("base64"),nameMedia, `Description enregistrée.\n\nConfirmez-vous l'envoi de la campagne aux groupes : ${serviceChoice.map(group => group.name).join(', ')} (Total des utilisateurs : ${totalMembers}) ? (Tapez OUI pour confirmer ou # pour annuler)\n\nTitre : ${name}\n\n _Tapez # pour revenir au menu principal_`)
             Steps[msg.from]["currentMenu"] = "confirmCampaign"; 
