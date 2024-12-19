@@ -6,8 +6,8 @@ const { kycEnterpriseCommander } = require('./kyc-enterprise');
 const { kycPersonCollectiveCommander } = require("./kyc-person-collective");
 const { kycEnterpriseCollectiveCommander } = require("./kyc-enterprise-collective");
 const { listAccounts } = require("../../services/account.service");
-const {createPaymentIntent} = require("../../services/paymentIntent.service")
-const { GainSimulationCommander } = require("./simulator")
+const {createPaymentIntent} = require("../../services/paymentIntent.service");
+const { GainSimulationCommander } = require("./simulator");
 let Steps = {};
 
 const UserCommander = async (user, msg, client) => {
@@ -241,7 +241,8 @@ const UserCommander = async (user, msg, client) => {
                     },client)
 
                 } else {
-                    msg.reply(`Numéro de compte invalide. Veuillez entrer un numéro de compte valide pour afficher les détails.\n\n_Tapez # pour revenir au menu principal_`);
+                  Steps[msg.from]["currentMenu"] = "mainMenu";
+                  msg.reply(`Numéro de compte invalide. Veuillez entrer un numéro de compte valide pour afficher les détails.\n\n_Tapez # pour revenir au menu principal_`);
                 }
             }
             break;
