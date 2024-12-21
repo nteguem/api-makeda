@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
 const userRoles = ['admin', 'user'];
+const creationSources = ['whatsapp', 'backoffice'];
 
 const userSchema = new mongoose.Schema({
   pseudo: { type: String, required: true },
@@ -13,6 +14,7 @@ const userSchema = new mongoose.Schema({
   engagementLevel: { type: Number },
   role: { type: String, required: true, enum: userRoles, default: 'user' },
   referralCode: { type: String, unique: true },
+  creationSource: { type: String, required: true, enum: creationSources, default: 'whatsapp' },
 }, { timestamps: true });
 
 function generateReferralCode() {
@@ -46,16 +48,15 @@ userSchema.pre('save', async function (next) {
 
 userSchema.pre('findOneAndUpdate', async function (next) {
   const update = this.getUpdate();
-  
+
   if (update.$set && update.$set.password) {
-    const salt = await bcrypt.genSalt(10); 
+    const salt = await bcrypt.genSalt(10);
     update.$set.password = await bcrypt.hash(update.$set.password, salt);
-    this.setUpdate(update); 
+    this.setUpdate(update);
   }
   next();
 });
 
-
 const User = mongoose.model('User', userSchema);
 
-module.exports = User; 
+module.exports = User;
