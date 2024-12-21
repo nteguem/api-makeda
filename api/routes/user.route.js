@@ -23,7 +23,7 @@ const setupUserRoutes = (app, client) => {
         userHandler.updateUser(req, res, client);
     });
 
-    router.put('/add', (req, res) => {
+    router.post('/add', (req, res) => {
         userHandler.addUser(req, res, client);
     });
 };
