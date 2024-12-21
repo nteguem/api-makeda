@@ -147,10 +147,22 @@ async function list(role, client, limit = 10, offset = 0) {
   }
 }
 
+async function addUser(req, res) {
+  try {
+    const dataUser = req.body;
+    const newUser = new User(dataUser);
+    await newUser.save();
+    return ResponseService.created(res, { message: 'User créée avec succès' });
+  } catch (error) {
+    return ResponseService.internalServerError(res, { error: error.message });
+  }
+}
+
 
 module.exports = {
   save,
   login,
   list,
-  update
+  update,
+  addUser
 };

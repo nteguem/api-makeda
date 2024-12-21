@@ -43,8 +43,14 @@ const login = async (req, res,client) => {
   }
 };
 
+async function addUser(req, res) {
+  const response = await userService.addUser(req, res);
+  return response;
+}
+
 module.exports = {
   getAllUser,
   login,
-  updateUser
+  updateUser,
+  addUser
 };

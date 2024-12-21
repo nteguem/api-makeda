@@ -22,6 +22,10 @@ const setupUserRoutes = (app, client) => {
     router.put('/update', (req, res) => {
         userHandler.updateUser(req, res, client);
     });
+
+    router.put('/add', (req, res) => {
+        userHandler.addUser(req, res, client);
+    });
 };
 
 module.exports = { setupUserRoutes };
