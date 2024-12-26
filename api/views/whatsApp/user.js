@@ -108,10 +108,13 @@ const UserCommander = async (user, msg, client) => {
               msg.reply(Menu);
               break;
 
-              case "noel":
-              case "noël":
-              case "Noel":
-                  const messageNoel = `Bienvenue chez MAKEDA! \n
+            case "noel":
+            case "noël":
+            case "NOEL":
+            case "NOËL":
+            case "Noel":
+            case "Noël":
+              const messageNoel = `Bienvenue chez MAKEDA! \n
 Nous vous remercions pour votre fidélité. \n
 Veuillez envoyer vos cordonnées, pour participer à notre Tombola de Noël.\n
 Nous avons hâte de vous compter  parmi les gagnants. \n\n\n
