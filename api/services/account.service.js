@@ -5,14 +5,23 @@ const {addUserToGroupByPhoneNumber} = require("./group.service")
 const {sendMessageToNumber} = require('../views/whatsApp/whatsappMessaging')
 const logger = require("../helpers/logger")
 
-async function createAccount(accountData,client) {
+async function createAccount(accountData, client) {
     try {
+        // Check if an account already exists for the user
+        const existingAccount = await Account.findOne({ user: accountData.user });
+        if (existingAccount) {
+            return { success: false, error: 'An account already exists for this user.' };
+        }
+
+        // Create the new account if it doesn't already exist
         const newAccount = new Account(accountData);
         await newAccount.save();
 
+        // Fetch user information and phone number
         const user = await User.findById(accountData.user);
         const userPhoneNumber = user.phoneNumber;
 
+        // Define user groups based on the account data
         const groups = [
             DefaultGroupNames.GROUPE_UTILISATEURS_AVEC_COMPTE,
             accountData.service === "Conseil Financier" ? DefaultGroupNames.GROUPE_CONSEIL_FINANCIER :
@@ -30,42 +39,50 @@ async function createAccount(accountData,client) {
             DefaultGroupNames.GROUPE_AUTRE
         ];
 
+        // Add user to the relevant groups
         for (const group of groups) {
             await addUserToGroupByPhoneNumber(group, userPhoneNumber);
-        } 
+        }
 
-        return { success: true, message: 'Compte créé avec succès' };
+        return { success: true, message: 'Account created successfully' };
     } catch (error) {
-        logger(client).error('Error createAccount:', error);
+        logger(client).error('Error creating account:', error);
         return { success: false, error: error.message };
     }
 }
 
 
-async function updateAccount(accountId, updatedData,client) {
-    try {       
+
+async function updateAccount(accountId, updatedData, client) {
+    try {
+        // check if data is empty
+        if (Object.keys(updatedData).length === 0) {
+            return { success: false, error: 'Les données de mise à jour ne peuvent pas être vides.' };
+        }
+
         const account = await Account.findByIdAndUpdate(accountId, updatedData, { new: true });
-        const user = await User.findById(account.user);
-        const userPhoneNumber = user.phoneNumber;
         if (!account) {
             return { success: false, error: 'Compte non trouvé' };
         }
-        if(updatedData.verified === "rejected")
-            {
-                await sendMessageToNumber(client,userPhoneNumber,`*Rejet de votre demande de création de compte*\n\n${account.rejectionReason}`);
-            }
-            else
-            {
-                await sendMessageToNumber(client, userPhoneNumber,  
-                    `*Approbation de votre demande de création de compte*\n\n 1-compte : ${account.accountType === "personne_physique" ? `${account.name} ${account.firstName}` : account.socialName}\n 2-service : ${account.service}\n 3-type : ${account.accountType}\n\n L'équipe Makeda Asset Management vous contactera rapidement pour assurer le suivi de votre compte.`
-                );
-            }
+
+        const user = await User.findById(account.user);
+        const userPhoneNumber = user.phoneNumber;
+
+        if (updatedData.verified === "rejected") {
+            await sendMessageToNumber(client, userPhoneNumber, `*Rejet de votre demande de création de compte*\n\n${account.rejectionReason}`);
+        } else {
+            await sendMessageToNumber(client, userPhoneNumber,
+                `*Approbation de votre demande de création de compte*\n\n 1-compte : ${account.accountType === "personne_physique" ? `${account.name} ${account.firstName}` : account.socialName}\n 2-service : ${account.service}\n 3-type : ${account.accountType}\n\n L'équipe Makeda Asset Management vous contactera rapidement pour assurer le suivi de votre compte.`
+            );
+        }
+
         return { success: true, message: 'Compte mis à jour avec succès', account };
     } catch (error) {
         logger(client).error('Error updateAccount:', error);
         return { success: false, error: error.message };
     }
 }
+
 
 async function deleteAccount(accountId,client) {
     try {

@@ -6,15 +6,15 @@ const AccountService = require('../../services/account.service');
 const { list } = require("../../services/user.service")
 const { getRandomDelay } = require("../../helpers/utils")
 const logger = require('../../helpers/logger');
-const {ToWords} = require('to-words');
+const { ToWords } = require('to-words');
 const toWords = new ToWords({
-    localeCode: 'fr-FR',
-    converterOptions: {
-      currency: false,
-      ignoreDecimal: true,
-      ignoreZeroCurrency: true,
-    }
-  });
+  localeCode: 'fr-FR',
+  converterOptions: {
+    currency: false,
+    ignoreDecimal: true,
+    ignoreZeroCurrency: true,
+  }
+});
 
 // Objet pour stocker l'étape actuelle et les réponses de l'utilisateur
 let userData = {};
@@ -92,10 +92,10 @@ const kycEnterpriseCollectiveCommander = async (user, msg, client, service) => {
         case 7:
           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
           if (emailRegex.test(userInput.trim())) {
-              userData[phoneNumber].answers["email"] = userInput.trim();
-              userData[phoneNumber].step++;
+            userData[phoneNumber].answers["email"] = userInput.trim();
+            userData[phoneNumber].step++;
           } else {
-              msg.reply("Veuillez entrer une adresse email valide (ex: exemple@domaine.com).");
+            msg.reply("Veuillez entrer une adresse email valide (ex: exemple@domaine.com).");
           }
           break;
         case 8:
@@ -170,8 +170,8 @@ const kycEnterpriseCollectiveCommander = async (user, msg, client, service) => {
           }
           break;
         case 16:
-          if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B" || userInput.toUpperCase() === "C"|| userInput.toUpperCase() === "D") {
-            userData[phoneNumber].answers["riskLevel"] = userInput.toUpperCase() === "A" ? "Très faible" : userInput.toUpperCase() === "B" ? "Faible": userInput.toUpperCase() === "C" ? "Moyen" : "Très élevé";
+          if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B" || userInput.toUpperCase() === "C" || userInput.toUpperCase() === "D") {
+            userData[phoneNumber].answers["riskLevel"] = userInput.toUpperCase() === "A" ? "Très faible" : userInput.toUpperCase() === "B" ? "Faible" : userInput.toUpperCase() === "C" ? "Moyen" : "Très élevé";
             userData[phoneNumber].step++;
           } else {
             msg.reply("Veuillez choisir A, B , C ou D.");
@@ -182,14 +182,14 @@ const kycEnterpriseCollectiveCommander = async (user, msg, client, service) => {
             // Si l'utilisateur choisit une autre option, enregistrez simplement la réponse
             userData[phoneNumber].answers["financialMarketExperience"] = userInput.toUpperCase() === "A" ? "Oui" : "Non";
             userData[phoneNumber].step++;
-            countCase = 0; 
-        }  else {
-          msg.reply("Veuillez choisir A ou B.");
-        }
+            countCase = 0;
+          } else {
+            msg.reply("Veuillez choisir A ou B.");
+          }
           break;
         case 18:
-          if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B" || userInput.toUpperCase() === "C"|| userInput.toUpperCase() === "D") {
-            userData[phoneNumber].answers["financialSituationLastThreeYears"] = userInput.toUpperCase() === "A" ? "Difficile" : userInput.toUpperCase() === "B" ? "Stable": userInput.toUpperCase() === "C" ? "Bonne performance" : "Très bonne croissance";
+          if (userInput.toUpperCase() === "A" || userInput.toUpperCase() === "B" || userInput.toUpperCase() === "C" || userInput.toUpperCase() === "D") {
+            userData[phoneNumber].answers["financialSituationLastThreeYears"] = userInput.toUpperCase() === "A" ? "Difficile" : userInput.toUpperCase() === "B" ? "Stable" : userInput.toUpperCase() === "C" ? "Bonne performance" : "Très bonne croissance";
             userData[phoneNumber].step++;
           } else {
             msg.reply("Veuillez choisir A, B , C ou D.");
@@ -250,7 +250,7 @@ const kycEnterpriseCollectiveCommander = async (user, msg, client, service) => {
           break;
         case 27:
           userData[phoneNumber].answers["initialAmountFCP"] = userInput;
-          userData[phoneNumber].answers["initialAmountLetterFCP"] = toWords.convert(userInput)+" FCFA";
+          userData[phoneNumber].answers["initialAmountLetterFCP"] = toWords.convert(userInput) + " FCFA";
           userData[phoneNumber].step++;
           break;
         case 28:
@@ -302,8 +302,15 @@ const kycEnterpriseCollectiveCommander = async (user, msg, client, service) => {
                 }
               }
             } else {
-              logger(client).error("response create account:", response);
-              msg.reply(`echec creation du compte!`)
+              if (response.success.error === 'An account already exists for this user.') {
+                msg.reply(`Un compte existe déjà pour cet utilisateur. Vous ne pouvez plus créer de compte. Pour toute assistance, contactez notre service client au +237 699674616.`)
+                logger(client).error("response create account:", response);
+              }
+              else {
+                msg.reply(`echec creation du compte!`)
+                logger(client).error("response create account:", response);
+
+              }
             }
           }
           else {
@@ -397,7 +404,7 @@ const getCurrentStepMessage = (step) => {
       return `Vous avez terminé de créer votre KYC. À quel type de produit souhaitez-vous souscrire ? \n\n 1-FCP MAKEDA HORIZON`;
     case 27:
       return `Nom du produit : FCP MAKEDA HORIZON\nCatégorie : Obligataire\nRendement minimum : 5% net/ an pouvant aller à la hausse selon la flexibilité du marché\nHorizon de placement recommandé : 2 ans\nMinimum de souscription : 10 Milles XAF\nProduit défiscalisé\n\nQuel est votre montant de souscription initiale ? eg:100000`;
-        case 28:
+    case 28:
       return `📋 *Quel est votre moyen de paiement ?* \n\n A-Virement \n B-Mobile money (OM|MOMO)`;
     case 29:
       return `📋 *Quelle est votre fréquence de versement et le montant souhaité ?*  \n\n A-Mensuelle \n B-Trimestrielle \n C-Semestrielle \n D-Annuelle `;

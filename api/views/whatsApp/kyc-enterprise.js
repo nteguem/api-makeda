@@ -253,9 +253,17 @@ const kycEnterpriseCommander = async (user, msg, client, service) => {
                     logger(client).error(`Erreur lors de l'envoi ${admin.phoneNumber}`, error);
                   }
               }
-              } else {
-                logger(client).error("response create account:",response);
-                msg.reply(`echec creation du compte!`)
+              }
+              else {
+                if (response.success.error === 'An account already exists for this user.') {
+                  msg.reply(`Un compte existe déjà pour cet utilisateur. Vous ne pouvez plus créer de compte. Pour toute assistance, contactez notre service client au +237 699674616.`)
+                  logger(client).error("response create account:", response);
+                }
+                else {
+                  msg.reply(`echec creation du compte!`)
+                  logger(client).error("response create account:", response);
+  
+                }
               }
             }
             else {

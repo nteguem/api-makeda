@@ -30,15 +30,40 @@ async function updatePlateforme(req, res) {
   try {
     const plateformeId = req.query.id;
     const updatedData = req.body;
-    const plateforme = await Plateforme.findByIdAndUpdate(plateformeId, updatedData, { new: true });
-    if (!plateforme) {
-      return ResponseService.notFound(res, { message: 'Plateforme non trouvée' });
+
+    // Check if the provided data is empty or invalid
+    if (Object.keys(updatedData).length === 0) {
+      return ResponseService.badRequest(res, { message: 'No data provided for update' });
     }
-    return ResponseService.success(res, { message: 'Plateforme mise à jour avec succès', plateforme });
+
+    // Validate specific fields (example: check if the name is not empty)
+    if (updatedData.name && updatedData.name.trim() === '') {
+      return ResponseService.badRequest(res, { message: 'Platform name cannot be empty' });
+    }
+
+    // Filter out empty fields from updatedData before sending to the database
+    const filteredData = Object.fromEntries(
+      Object.entries(updatedData).filter(([key, value]) => value !== null && value !== undefined && value !== '')
+    );
+
+    // If no valid data remains after filtering, return an error
+    if (Object.keys(filteredData).length === 0) {
+      return ResponseService.badRequest(res, { message: 'No valid data provided for update' });
+    }
+
+    // Update the platform in the database
+    const plateforme = await Plateforme.findByIdAndUpdate(plateformeId, filteredData, { new: true });
+
+    if (!plateforme) {
+      return ResponseService.notFound(res, { message: 'Platform not found' });
+    }
+
+    return ResponseService.success(res, { message: 'Platform successfully updated', plateforme });
   } catch (error) {
     return ResponseService.internalServerError(res, { error: error.message });
   }
 }
+
 
 async function deletePlateforme(req, res) {
   try {

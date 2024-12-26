@@ -7,6 +7,7 @@ const accountSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: true,
+    unique: true 
   },
   service: {
     type: String,

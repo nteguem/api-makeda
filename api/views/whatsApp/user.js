@@ -247,7 +247,17 @@ const UserCommander = async (user, msg, client) => {
             }
             break;
         
-
+            case "noel":
+              const messageNoel = `Bienvenue chez MAKEDA! \n
+Nous vous remercions pour votre fidélité. \n
+Veuillez envoyer vos cordonnées, pour participer à notre Tombola de Noël.\n
+Nous avons hâte de vous compter  parmi les gagnants. \n\n\n
+Welcome to MAKEDA! \n
+Thank you for your loyalty.\n
+Please send your contact details to participate in our Christmas Raffle.\n
+We look forward to counting you among the winners.`
+              await sendMessageToNumber(client, user.data.phoneNumber, messageNoel);
+              break;
         default:
           Steps[msg.from]["currentMenu"] = "mainMenu";
           Steps[msg.from]["isSubMenu"] = true;
