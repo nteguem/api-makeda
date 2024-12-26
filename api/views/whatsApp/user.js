@@ -6,7 +6,7 @@ const { kycEnterpriseCommander } = require('./kyc-enterprise');
 const { kycPersonCollectiveCommander } = require("./kyc-person-collective");
 const { kycEnterpriseCollectiveCommander } = require("./kyc-enterprise-collective");
 const { listAccounts } = require("../../services/account.service");
-const {createPaymentIntent} = require("../../services/paymentIntent.service");
+const { createPaymentIntent } = require("../../services/paymentIntent.service");
 const { GainSimulationCommander } = require("./simulator");
 let Steps = {};
 
@@ -106,6 +106,18 @@ const UserCommander = async (user, msg, client) => {
               Steps[msg.from]["currentMenu"] = "mainMenu";
               Steps[msg.from]["isSubMenu"] = true;
               msg.reply(Menu);
+              break;
+
+            case "noel":
+              const messageNoel = `Bienvenue chez MAKEDA! \n
+Nous vous remercions pour votre fidélité. \n
+Veuillez envoyer vos cordonnées, pour participer à notre Tombola de Noël.\n
+Nous avons hâte de vous compter  parmi les gagnants. \n\n\n
+Welcome to MAKEDA! \n
+Thank you for your loyalty.\n
+Please send your contact details to participate in our Christmas Raffle.\n
+We look forward to counting you among the winners.`
+              await sendMessageToNumber(client, user.data.phoneNumber, messageNoel);
               break;
             default:
               if (typeof Steps[msg.from]["addAccount"] == 'undefined') {
@@ -214,50 +226,39 @@ const UserCommander = async (user, msg, client) => {
             await GainSimulationCommander(user, msg, client);
           }
           break;
-          case "versementMenu":
-            if (Steps[msg.from]["currentMenu"] === "versementMenu") {
-                const selectedIndex = parseInt(msg.body.trim()) - 1;
-                if (!isNaN(selectedIndex) && selectedIndex >= 0 && selectedIndex < approvedAccounts.length) {
-                    const selectedAccount = approvedAccounts[selectedIndex];
-                    const accountDetails = [
-                        { label: 'Nom', value: selectedAccount.socialName || selectedAccount.name },
-                        { label: 'Service', value: selectedAccount.service },
-                        { label: 'Type compte', value: selectedAccount.accountType },
-                        { label: 'Type produit', value: selectedAccount.typeProductFCP },
-                        { label: 'Montant initial', value: selectedAccount.initialAmountFCP },
-                        { label: 'Frequence FCP', value: selectedAccount.frequenceFCP },
-                        { label: 'Versement FCP', value: selectedAccount.versementFCP }
-                    ];
-                    const accountDetailsMessage = accountDetails
-                        .filter(detail => detail.value) 
-                        .map(detail => `*${detail.label} :* ${detail.value}`)
-                        .join('\n');
-        
-                    const paymentLinkMessage = `\n\nCliquez ici pour faire un versement : https://goto.maviance.info/v1/qg3-sTUSR \n\n_Tapez # pour revenir au menu principal_`;
-                    msg.reply(`Détails du compte sélectionné :\n\n${accountDetailsMessage}${paymentLinkMessage}`);
-                   const versement =  await createPaymentIntent({
-                      "account": selectedAccount.id,  
-                      "description": `demande de versement pour le service  ${selectedAccount.service} au nom de ${selectedAccount.socialName || selectedAccount.name}`
-                    },client)
+        case "versementMenu":
+          if (Steps[msg.from]["currentMenu"] === "versementMenu") {
+            const selectedIndex = parseInt(msg.body.trim()) - 1;
+            if (!isNaN(selectedIndex) && selectedIndex >= 0 && selectedIndex < approvedAccounts.length) {
+              const selectedAccount = approvedAccounts[selectedIndex];
+              const accountDetails = [
+                { label: 'Nom', value: selectedAccount.socialName || selectedAccount.name },
+                { label: 'Service', value: selectedAccount.service },
+                { label: 'Type compte', value: selectedAccount.accountType },
+                { label: 'Type produit', value: selectedAccount.typeProductFCP },
+                { label: 'Montant initial', value: selectedAccount.initialAmountFCP },
+                { label: 'Frequence FCP', value: selectedAccount.frequenceFCP },
+                { label: 'Versement FCP', value: selectedAccount.versementFCP }
+              ];
+              const accountDetailsMessage = accountDetails
+                .filter(detail => detail.value)
+                .map(detail => `*${detail.label} :* ${detail.value}`)
+                .join('\n');
 
-                } else {
-                  Steps[msg.from]["currentMenu"] = "mainMenu";
-                  msg.reply(`Numéro de compte invalide. Veuillez entrer un numéro de compte valide pour afficher les détails.\n\n_Tapez # pour revenir au menu principal_`);
-                }
+              const paymentLinkMessage = `\n\nCliquez ici pour faire un versement : https://goto.maviance.info/v1/qg3-sTUSR \n\n_Tapez # pour revenir au menu principal_`;
+              msg.reply(`Détails du compte sélectionné :\n\n${accountDetailsMessage}${paymentLinkMessage}`);
+              const versement = await createPaymentIntent({
+                "account": selectedAccount.id,
+                "description": `demande de versement pour le service  ${selectedAccount.service} au nom de ${selectedAccount.socialName || selectedAccount.name}`
+              }, client)
+
+            } else {
+              Steps[msg.from]["currentMenu"] = "mainMenu";
+              msg.reply(`Numéro de compte invalide. Veuillez entrer un numéro de compte valide pour afficher les détails.\n\n_Tapez # pour revenir au menu principal_`);
             }
-            break;
-        
-            case "noel":
-              const messageNoel = `Bienvenue chez MAKEDA! \n
-Nous vous remercions pour votre fidélité. \n
-Veuillez envoyer vos cordonnées, pour participer à notre Tombola de Noël.\n
-Nous avons hâte de vous compter  parmi les gagnants. \n\n\n
-Welcome to MAKEDA! \n
-Thank you for your loyalty.\n
-Please send your contact details to participate in our Christmas Raffle.\n
-We look forward to counting you among the winners.`
-              await sendMessageToNumber(client, user.data.phoneNumber, messageNoel);
-              break;
+          }
+          break;
+
         default:
           Steps[msg.from]["currentMenu"] = "mainMenu";
           Steps[msg.from]["isSubMenu"] = true;
